@@ -45,7 +45,7 @@ describe('Auth API', () => {
     });
 
     describe('POST /api/auth/login', () => {
-        it('should login a user with correct credentials', (done) => {
+        it('should login a user and return a token', (done) => {
             const credentials = {
                 username: 'admin1',
                 password: '123456',
@@ -59,6 +59,7 @@ describe('Auth API', () => {
                     if (err) return done(err);
                     expect(res.body).to.be.an('object');
                     expect(res.body).to.have.property('message', 'Login successful');
+                    expect(res.body).to.have.property('token').that.is.a('string');
                     expect(res.body).to.have.property('user');
                     expect(res.body.user).to.have.property('username', 'admin1');
                     expect(res.body.user).to.have.property('role', 'admin');
