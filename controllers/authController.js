@@ -1,4 +1,7 @@
 import User from '../models/user.js';
+import bcrypt from 'bcrypt';
+
+const SALT_ROUNDS = 10;
 
 export const register = async (req, res) => {
     const { username, password, role, department_id } = req.body;
@@ -13,7 +16,8 @@ export const register = async (req, res) => {
             return res.status(400).json({ message: 'Username already exists' });
         }
 
-        const newUser = await User.create({ username, password, role, department_id });
+        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+        const newUser = await User.create({ username, password: hashedPassword, role, department_id });
         res.status(201).json({ message: 'User registered successfully', user: newUser });
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
@@ -29,7 +33,7 @@ export const login = async (req, res) => {
 
     try {
         const user = await User.findByUsername(username);
-        if (!user || user.password !== password) {
+        if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
 
