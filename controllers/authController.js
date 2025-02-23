@@ -1,5 +1,6 @@
 import User from '../models/user.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const SALT_ROUNDS = 10;
 
@@ -37,8 +38,15 @@ export const login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
 
+        const token = jwt.sign(
+            { id: user.id, username: user.username, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' } // Токен истекает через 1 час (позже есть резон увеличить это время)
+        );
+
         res.status(200).json({
             message: 'Login successful',
+            token,
             user: { id: user.id, username: user.username, role: user.role },
         });
     } catch (err) {
