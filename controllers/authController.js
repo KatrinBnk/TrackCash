@@ -19,3 +19,25 @@ export const register = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
+export const login = async (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' });
+    }
+
+    try {
+        const user = await User.findByUsername(username);
+        if (!user || user.password !== password) {
+            return res.status(401).json({ message: 'Invalid username or password' });
+        }
+
+        res.status(200).json({
+            message: 'Login successful',
+            user: { id: user.id, username: user.username, role: user.role },
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
