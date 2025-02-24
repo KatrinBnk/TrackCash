@@ -9,7 +9,7 @@ describe('Auth API', () => {
     describe('POST /api/auth/register', () => {
         it('should allow admin to register a new user', (done) => {
             const adminCredentials = { username: 'admin1', password: '123456' };
-            const newUser = { username: 'manager1', password: '654321', role: 'manager' };
+            const newUser = { username: 'managerNew', password: '654321', role: 'manager' };
 
             request(app)
                 .post('/api/auth/login')
@@ -26,7 +26,7 @@ describe('Auth API', () => {
                         .end((err, res) => {
                             if (err) return done(err);
                             expect(res.body).to.have.property('message', 'User registered successfully');
-                            expect(res.body.user).to.have.property('username', 'manager1');
+                            expect(res.body.user).to.have.property('username', 'managerNew');
                             expect(res.body.user).to.have.property('role', 'manager');
                             done();
                         });
@@ -34,8 +34,8 @@ describe('Auth API', () => {
         });
 
         it('should return 403 if non-admin tries to register a user', (done) => {
-            const managerCredentials = { username: 'manager1', password: '654321' };
-            const newUser = { username: 'employee1', password: '789101', role: 'employee' };
+            const managerCredentials = { username: 'manager1', password: '123456' };
+            const newUser = { username: 'employeeNew', password: '789101', role: 'employee' };
 
             request(app)
                 .post('/api/auth/login')
