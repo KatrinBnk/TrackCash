@@ -36,6 +36,11 @@ class Department {
         const [departments] = await db.query('SELECT * FROM Departments');
         return departments;
     }
+
+    static async getById(id) {
+        const [departments] = await db.query('SELECT * FROM Departments WHERE id = ?', [id]);
+        return departments[0] || null;
+    }
 }
 
 export default Department;

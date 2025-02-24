@@ -7,5 +7,6 @@ const router = express.Router();
 router.post('/', authenticateToken, requireAdmin, departmentController.createDepartment);
 router.put('/:id', authenticateToken, requireAdmin, departmentController.updateDepartment);
 router.get('/', authenticateToken, departmentController.getDepartments);
+router.get('/:id', authenticateToken, departmentController.getDepartmentById);
 
 export default router;

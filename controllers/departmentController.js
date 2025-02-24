@@ -63,3 +63,18 @@ export const getDepartments = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
+export const getDepartmentById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const department = await Department.getById(id);
+        if (!department) {
+            return res.status(404).json({ message: 'Department not found' });
+        }
+        res.status(200).json(department);
+    } catch (err) {
+        console.error('Error fetching department by id:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
