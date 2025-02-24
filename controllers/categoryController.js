@@ -16,6 +16,14 @@ export const createCategory = async (req, res) => {
         }
         const departmentId = department[0].id;
 
+        const [existingCategory] = await db.query(
+            'SELECT * FROM Categories WHERE name = ? AND department_id = ?',
+            [name, departmentId]
+        );
+        if (existingCategory.length) {
+            return res.status(400).json({ message: 'Category name already exists in your department' });
+        }
+
         const category = await Category.create({ name, departmentId });
         res.status(201).json({ message: 'Category created successfully', category });
     } catch (err) {
