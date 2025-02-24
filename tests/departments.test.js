@@ -194,5 +194,105 @@ describe('Departments API', () => {
                         });
                 });
         });
+        it('should return 400 if no fields provided', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const initialDepartment = { name: 'Test Department' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    request(app)
+                        .post('/api/departments')
+                        .set('Authorization', `Bearer ${token}`)
+                        .send(initialDepartment)
+                        .end((err, createRes) => {
+                            if (err) return done(err);
+                            const departmentId = createRes.body.department.id;
+
+                            request(app)
+                                .put(`/api/departments/${departmentId}`)
+                                .set('Authorization', `Bearer ${token}`)
+                                .send({})
+                                .expect(400)
+                                .end((err, res) => {
+                                    if (err) return done(err);
+                                    expect(res.body).to.have.property('message', 'At least one field (name or manager_id) must be provided');
+                                    done();
+                                });
+                        });
+                });
+        });
+        it('should return 404 if department not found', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const updatedDepartment = { name: 'Non-existent Department' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    request(app)
+                        .put('/api/departments/999')
+                        .set('Authorization', `Bearer ${token}`)
+                        .send(updatedDepartment)
+                        .expect(404)
+                        .end((err, res) => {
+                            if (err) return done(err);
+                            expect(res.body).to.have.property('message', 'Department not found');
+                            done();
+                        });
+                });
+        });
+        it('should return 400 if manager is already assigned to another department', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const dept1 = { name: 'Dept1', manager_id: 2 }; // manager1 из setupDatabase
+            const dept2 = { name: 'Dept2' };
+            const updatedDept2 = { name: 'Dept2 Updated', manager_id: 2 };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    // Создаём первый отдел с менеджером
+                    request(app)
+                        .post('/api/departments')
+                        .set('Authorization', `Bearer ${token}`)
+                        .send(dept1)
+                        .end((err) => {
+                            if (err) return done(err);
+
+                            // Создаём второй отдел
+                            request(app)
+                                .post('/api/departments')
+                                .set('Authorization', `Bearer ${token}`)
+                                .send(dept2)
+                                .end((err, createRes) => {
+                                    if (err) return done(err);
+                                    const dept2Id = createRes.body.department.id;
+
+                                    // Пытаемся назначить занятого менеджера
+                                    request(app)
+                                        .put(`/api/departments/${dept2Id}`)
+                                        .set('Authorization', `Bearer ${token}`)
+                                        .send(updatedDept2)
+                                        .expect(400)
+                                        .end((err, res) => {
+                                            if (err) return done(err);
+                                            expect(res.body).to.have.property('message', 'Manager is already assigned to another department');
+                                            done();
+                                        });
+                                });
+                        });
+                });
+        });
     });
 });
