@@ -5,9 +5,10 @@ import { setupDatabase } from './testSetup.js';
 
 before(setupDatabase);
 
+//TODO: Добавить проверку и других исключительных ситуаций
+
 describe('Departments API', () => {
     describe('POST /api/departments', () => {
-
         it('should return 403 if non-admin tries to create a department', (done) => {
             const employeeCredentials = { username: 'employee1', password: '123456' }; // Пароль из setupDatabase
             const department = { name: 'HR Department' };
@@ -33,7 +34,6 @@ describe('Departments API', () => {
                         });
                 });
         });
-
         it('should return 400 if department name is missing', (done) => {
             const adminCredentials = { username: 'admin1', password: '123456' };
             const department = {};
@@ -57,7 +57,6 @@ describe('Departments API', () => {
                         });
                 });
         });
-
         it('should allow admin to create a department without manager', (done) => {
             const adminCredentials = { username: 'admin1', password: '123456' };
             const department = { name: 'IT Department 1' };
@@ -83,7 +82,6 @@ describe('Departments API', () => {
                         });
                 });
         });
-
         it('should allow admin to create a department with manager', (done) => {
             const adminCredentials = { username: 'admin1', password: '123456' };
             const department = { name: 'IT Department', manager_id: 2 };
@@ -292,6 +290,96 @@ describe('Departments API', () => {
                                         });
                                 });
                         });
+                });
+        });
+    });
+
+    describe('GET /api/departments', () => {
+        it('should allow admin to view departments', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const department = { name: 'Test Department' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    request(app)
+                        .post('/api/departments')
+                        .set('Authorization', `Bearer ${token}`)
+                        .send(department)
+                        .end((err) => {
+                            if (err) return done(err);
+
+                            request(app)
+                                .get('/api/departments')
+                                .set('Authorization', `Bearer ${token}`)
+                                .expect(200)
+                                .end((err, res) => {
+                                    if (err) return done(err);
+                                    expect(res.body).to.be.an('array');
+                                    expect(res.body).to.have.lengthOf.at.least(1);
+                                    expect(res.body[0]).to.have.property('name', 'Test Department');
+                                    done();
+                                });
+                        });
+                });
+        });
+
+        it('should allow manager to view departments', (done) => {
+            const managerCredentials = { username: 'manager1', password: '123456' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(managerCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    request(app)
+                        .get('/api/departments')
+                        .set('Authorization', `Bearer ${token}`)
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) return done(err);
+                            expect(res.body).to.be.an('array');
+                            done();
+                        });
+                });
+        });
+
+        it('should allow employee to view departments', (done) => {
+            const employeeCredentials = { username: 'employee1', password: '123456' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(employeeCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    request(app)
+                        .get('/api/departments')
+                        .set('Authorization', `Bearer ${token}`)
+                        .expect(200)
+                        .end((err, res) => {
+                            if (err) return done(err);
+                            expect(res.body).to.be.an('array');
+                            done();
+                        });
+                });
+        });
+
+        it('should return 401 if no token provided', (done) => {
+            request(app)
+                .get('/api/departments')
+                .expect(401)
+                .end((err, res) => {
+                    if (err) return done(err);
+                    expect(res.body).to.have.property('message', 'Access token required');
+                    done();
                 });
         });
     });
