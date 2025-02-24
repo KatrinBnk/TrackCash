@@ -110,4 +110,89 @@ describe('Departments API', () => {
                 });
         });
     });
+
+    describe('PUT /api/departments/:id', () => {
+        it('should allow admin to update a department', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const initialDepartment = { name: 'Sales Department' };
+            const updatedDepartment = { name: 'Marketing Department', manager_id: 2 }; // manager1 из setupDatabase
+
+            // Создаём отдел
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    request(app)
+                        .post('/api/departments')
+                        .set('Authorization', `Bearer ${token}`)
+                        .send(initialDepartment)
+                        .end((err, createRes) => {
+                            if (err) return done(err);
+                            const departmentId = createRes.body.department.id;
+
+                            // Обновляем отдел
+                            request(app)
+                                .put(`/api/departments/${departmentId}`)
+                                .set('Authorization', `Bearer ${token}`)
+                                .send(updatedDepartment)
+                                .expect(200)
+                                .end((err, res) => {
+                                    if (err) return done(err);
+                                    expect(res.body).to.have.property('message', 'Department updated successfully');
+                                    expect(res.body.department).to.have.property('name', 'Marketing Department');
+                                    expect(res.body.department).to.have.property('manager_id', 2);
+                                    done();
+                                });
+                        });
+                });
+        });
+        it('should return 403 if non-admin tries to update a department', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const employeeCredentials = { username: 'employee1', password: '123456' };
+            const initialDepartment = { name: 'Finance Department' };
+            const updatedDepartment = { name: 'Accounting Department' };
+
+            // Создаём отдел как админ
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, adminLoginRes) => {
+                    if (err) return done(err);
+                    const adminToken = adminLoginRes.body.token;
+
+                    request(app)
+                        .post('/api/departments')
+                        .set('Authorization', `Bearer ${adminToken}`)
+                        .send(initialDepartment)
+                        .end((err, createRes) => {
+                            if (err) return done(err);
+                            const departmentId = createRes.body.department.id;
+
+                            // Логиним сотрудника
+                            request(app)
+                                .post('/api/auth/login')
+                                .send(employeeCredentials)
+                                .end((err, employeeLoginRes) => {
+                                    if (err) return done(err);
+                                    const employeeToken = employeeLoginRes.body.token;
+
+                                    // Пытаемся обновить отдел
+                                    request(app)
+                                        .put(`/api/departments/${departmentId}`)
+                                        .set('Authorization', `Bearer ${employeeToken}`)
+                                        .send(updatedDepartment)
+                                        .expect(403)
+                                        .end((err, res) => {
+                                            if (err) return done(err);
+                                            expect(res.body).to.have.property('message', 'Admin access required');
+                                            done();
+                                        });
+                                });
+                        });
+                });
+        });
+    });
 });
