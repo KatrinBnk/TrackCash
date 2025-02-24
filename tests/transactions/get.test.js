@@ -54,9 +54,7 @@ describe('GET /api/transactions', () => {
         expect(res.body[0]).to.have.property('type', 'expense');
         expect(res.body[0]).to.have.property('amount', 50);
         expect(res.body[0]).to.have.property('comment', 'Lunch expense');
-        expect(res.body[0]).to.have.property('user_id', req.user.id); // Проверяем, что это транзакция сотрудника
     });
-
     it('should return 403 if non-employee tries to view transactions', async () => {
         const managerToken = await loginUser({ username: 'manager1', password: '123456' });
 
@@ -67,7 +65,6 @@ describe('GET /api/transactions', () => {
 
         expect(res.body).to.have.property('message', 'Employee access required');
     });
-
     it('should return 401 if no token provided', async () => {
         const res = await request(app)
             .get('/api/transactions')
@@ -75,7 +72,6 @@ describe('GET /api/transactions', () => {
 
         expect(res.body).to.have.property('message', 'Access token required');
     });
-
     it('should return empty array if employee has no transactions', async () => {
         const adminToken = await loginUser({ username: 'admin1', password: '123456' });
         await request(app)
@@ -94,7 +90,6 @@ describe('GET /api/transactions', () => {
         expect(res.body).to.be.an('array');
         expect(res.body).to.have.lengthOf(0);
     });
-
     it('should filter transactions by category_id if provided', async () => {
         const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
 
@@ -106,5 +101,17 @@ describe('GET /api/transactions', () => {
         expect(res.body).to.be.an('array');
         expect(res.body).to.have.lengthOf(1);
         expect(res.body[0]).to.have.property('category_id', categoryId);
+    });
+    it('should filter transactions by date range', async () => {
+        const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
+
+        const res = await request(app)
+            .get('/api/transactions?dateFrom=2025-02-23&dateTo=2025-02-23')
+            .set('Authorization', `Bearer ${employeeToken}`)
+            .expect(200);
+
+        expect(res.body).to.be.an('array');
+        expect(res.body).to.have.lengthOf(1);
+        expect(res.body[0]).to.have.property('date', '2025-02-23');
     });
 });

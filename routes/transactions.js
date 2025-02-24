@@ -5,5 +5,6 @@ import { authenticateToken, requireEmployee } from '../middleware/auth.js';
 const router = express.Router();
 
 router.post('/', authenticateToken, requireEmployee, transactionController.addTransaction);
+router.get('/', authenticateToken, requireEmployee, transactionController.getTransactions);
 
 export default router;
