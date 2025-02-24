@@ -31,3 +31,36 @@ export const createCategory = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
+export const getCategories = async (req, res) => {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    try {
+        // Только менеджеры и сотрудники могут видеть категории
+        if (userRole !== 'manager' && userRole !== 'employee') {
+            return res.status(403).json({ message: 'Access restricted to managers and employees' });
+        }
+
+        let departmentId;
+        if (userRole === 'manager') {
+            const [department] = await db.query('SELECT * FROM Departments WHERE manager_id = ?', [userId]);
+            if (!department.length) {
+                return res.status(400).json({ message: 'Manager is not assigned to a department' });
+            }
+            departmentId = department[0].id;
+        } else if (userRole === 'employee') {
+            const [user] = await db.query('SELECT department_id FROM Users WHERE id = ?', [userId]);
+            if (!user.length || !user[0].department_id) {
+                return res.status(400).json({ message: 'Employee is not assigned to a department' });
+            }
+            departmentId = user[0].department_id;
+        }
+
+        const categories = await Category.getByDepartmentId(departmentId);
+        res.status(200).json(categories);
+    } catch (err) {
+        console.error('Error fetching categories:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
