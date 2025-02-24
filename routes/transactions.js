@@ -7,5 +7,6 @@ const router = express.Router();
 router.post('/', authenticateToken, requireEmployee, transactionController.addTransaction);
 router.get('/', authenticateToken, requireEmployee, transactionController.getTransactions);
 router.put('/:id', authenticateToken, requireEmployee, transactionController.updateTransaction);
+router.delete('/:id', authenticateToken, requireEmployee, transactionController.deleteTransaction);
 
 export default router;

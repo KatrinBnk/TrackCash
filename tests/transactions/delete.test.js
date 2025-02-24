@@ -5,43 +5,43 @@ import db from '../../config/db.js';
 import { setupDatabase } from '../testSetup.js';
 import { loginUser, createDepartment, getUserIdByUsername } from '../testHelpers.js';
 
-let employeeDepartmentId;
-let categoryId;
-let transactionId;
-let employeeId;
-
-before(async () => {
-    await setupDatabase();
-    const adminToken = await loginUser({ username: 'admin1', password: '123456' });
-    const department = await createDepartment(adminToken, { name: 'IT Department', manager_id: 2 });
-    employeeDepartmentId = department.id;
-
-    await db.query('UPDATE Users SET department_id = ? WHERE username = ?', [employeeDepartmentId, 'employee1']);
-
-    const managerToken = await loginUser({ username: 'manager1', password: '123456' });
-    const categoryRes = await request(app)
-        .post('/api/categories')
-        .set('Authorization', `Bearer ${managerToken}`)
-        .send({ name: 'Travel Expenses' });
-    categoryId = categoryRes.body.category.id;
-
-    const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
-    const transactionRes = await request(app)
-        .post('/api/transactions')
-        .set('Authorization', `Bearer ${employeeToken}`)
-        .send({
-            category_id: categoryId,
-            type: 'expense',
-            amount: 50.00,
-            date: '2025-02-23 00:00:00',
-            comment: 'Lunch expense',
-        });
-    transactionId = transactionRes.body.transaction.id;
-
-    employeeId = await getUserIdByUsername('employee1');
-});
-
 describe('DELETE /api/transactions/:id', () => {
+    let employeeDepartmentId;
+    let categoryId;
+    let transactionId;
+    let employeeId;
+
+    beforeEach(async () => {
+        await setupDatabase();
+        const adminToken = await loginUser({ username: 'admin1', password: '123456' });
+        const department = await createDepartment(adminToken, { name: 'IT Department', manager_id: 2 });
+        employeeDepartmentId = department.id;
+
+        await db.query('UPDATE Users SET department_id = ? WHERE username = ?', [employeeDepartmentId, 'employee1']);
+
+        const managerToken = await loginUser({ username: 'manager1', password: '123456' });
+        const categoryRes = await request(app)
+            .post('/api/categories')
+            .set('Authorization', `Bearer ${managerToken}`)
+            .send({ name: 'Travel Expenses' });
+        categoryId = categoryRes.body.category.id;
+
+        const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
+        const transactionRes = await request(app)
+            .post('/api/transactions')
+            .set('Authorization', `Bearer ${employeeToken}`)
+            .send({
+                category_id: categoryId,
+                type: 'expense',
+                amount: 50.00,
+                date: '2025-02-23',
+                comment: 'Lunch expense',
+            });
+        transactionId = transactionRes.body.transaction.id;
+
+        employeeId = await getUserIdByUsername('employee1');
+    });
+
     it('should allow employee to delete their transaction', async () => {
         const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
 

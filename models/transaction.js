@@ -42,6 +42,11 @@ class Transaction {
         const [updated] = await db.query('SELECT * FROM Transactions WHERE id = ?', [id]);
         return updated[0];
     }
+
+    static async delete(id) {
+        const [result] = await db.query('DELETE FROM Transactions WHERE id = ?', [id]);
+        return result.affectedRows > 0;
+    }
 }
 
 export default Transaction;

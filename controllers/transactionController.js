@@ -74,3 +74,26 @@ export const updateTransaction = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
+export const deleteTransaction = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    try {
+        console.log('Attempting to delete transaction with ID:', id, 'by user ID:', userId);
+        const [transaction] = await db.query('SELECT * FROM Transactions WHERE id = ?', [id]);
+        console.log('Found transaction:', transaction);
+        if (!transaction.length) {
+            return res.status(404).json({ message: 'Transaction not found' });
+        }
+        if (transaction[0].user_id !== userId) {
+            return res.status(403).json({ message: 'You can only delete your own transactions' });
+        }
+
+        await Transaction.delete(id);
+        res.status(200).json({ message: 'Transaction deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting transaction:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
