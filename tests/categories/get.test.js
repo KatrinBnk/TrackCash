@@ -138,6 +138,18 @@ describe('GET /api/categories', () => {
         expect(res.body[0]).to.have.property('name', 'Office Supplies');
         expect(res.body[0]).to.have.property('department_id', managerDepartmentId);
     });
+    it('should filter categories case-insensitively', async () => {
+        const managerToken = await loginUser({ username: 'manager1', password: '123456' });
+
+        const res = await request(app)
+            .get('/api/categories?name=TraVeL')
+            .set('Authorization', `Bearer ${managerToken}`)
+            .expect(200);
+
+        expect(res.body).to.be.an('array');
+        expect(res.body).to.have.lengthOf(1);
+        expect(res.body[0]).to.have.property('name', 'Travel Expenses');
+    });
     it('should return empty array if no matches for filter', async () => {
         const managerToken = await loginUser({ username: 'manager1', password: '123456' });
 

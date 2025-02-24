@@ -35,9 +35,9 @@ export const createCategory = async (req, res) => {
 export const getCategories = async (req, res) => {
     const userId = req.user.id;
     const userRole = req.user.role;
+    const nameFilter = req.query.name; // Получаем query-параметр name
 
     try {
-        // Только менеджеры и сотрудники могут видеть категории
         if (userRole !== 'manager' && userRole !== 'employee') {
             return res.status(403).json({ message: 'Access restricted to managers and employees' });
         }
@@ -57,7 +57,7 @@ export const getCategories = async (req, res) => {
             departmentId = user[0].department_id;
         }
 
-        const categories = await Category.getByDepartmentId(departmentId);
+        const categories = await Category.getByDepartmentId(departmentId, nameFilter);
         res.status(200).json(categories);
     } catch (err) {
         console.error('Error fetching categories:', err);
