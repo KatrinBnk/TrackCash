@@ -28,6 +28,11 @@ class Category {
         const [updated] = await db.query('SELECT * FROM Categories WHERE id = ?', [id]);
         return updated[0];
     }
+
+    static async delete(id) {
+        const [result] = await db.query('DELETE FROM Categories WHERE id = ?', [id]);
+        return result.affectedRows > 0;
+    }
 }
 
 export default Category;

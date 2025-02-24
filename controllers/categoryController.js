@@ -107,3 +107,38 @@ export const updateCategory = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
+export const deleteCategory = async (req, res) => {
+    const { id } = req.params;
+    const managerId = req.user.id;
+
+    try {
+        const [department] = await db.query('SELECT * FROM Departments WHERE manager_id = ?', [managerId]);
+        if (!department.length) {
+            return res.status(400).json({ message: 'Manager is not assigned to a department' });
+        }
+        const departmentId = department[0].id;
+
+        const [category] = await db.query('SELECT * FROM Categories WHERE id = ?', [id]);
+        if (!category.length) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+        if (category[0].department_id !== departmentId) {
+            return res.status(403).json({ message: 'Category does not belong to your department' });
+        }
+
+        const [transactions] = await db.query('SELECT * FROM Transactions WHERE category_id = ?', [id]);
+        if (transactions.length > 0) {
+            return res.status(400).json({ message: 'Cannot delete category used in transactions' });
+        }
+
+        const deleted = await Category.delete(id);
+        if (!deleted) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+        res.status(200).json({ message: 'Category deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting category:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
