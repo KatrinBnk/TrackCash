@@ -529,4 +529,134 @@ describe('Departments API', () => {
                 });
         });
     });
+
+    describe('DELETE /api/departments/:id', () => {
+        it('should allow admin to delete a department', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const department = { name: 'Temp Department' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    request(app)
+                        .post('/api/departments')
+                        .set('Authorization', `Bearer ${token}`)
+                        .send(department)
+                        .end((err, createRes) => {
+                            if (err) return done(err);
+                            const departmentId = createRes.body.department.id;
+
+                            request(app)
+                                .delete(`/api/departments/${departmentId}`)
+                                .set('Authorization', `Bearer ${token}`)
+                                .expect(200)
+                                .end((err, res) => {
+                                    if (err) return done(err);
+                                    expect(res.body).to.have.property('message', 'Department deleted successfully');
+                                    done();
+                                });
+                        });
+                });
+        });
+        it('should return 400 if department is in use', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const department = { name: 'Used Department' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    request(app)
+                        .post('/api/departments')
+                        .set('Authorization', `Bearer ${token}`)
+                        .send(department)
+                        .end((err, createRes) => {
+                            if (err) return done(err);
+                            const departmentId = createRes.body.department.id;
+
+                            // Связываем отдел с категорией (для примера)
+                            db.query('INSERT INTO Categories (name, department_id) VALUES (?, ?)', ['Test Category', departmentId])
+                                .then(() => {
+                                    request(app)
+                                        .delete(`/api/departments/${departmentId}`)
+                                        .set('Authorization', `Bearer ${token}`)
+                                        .expect(400)
+                                        .end((err, res) => {
+                                            if (err) return done(err);
+                                            expect(res.body).to.have.property('message', 'Cannot delete department with associated categories or users');
+                                            done();
+                                        });
+                                });
+                        });
+                });
+        });
+        it('should return 403 if non-admin tries to delete a department', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const employeeCredentials = { username: 'employee1', password: '123456' };
+            const department = { name: 'Temp Department' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, adminLoginRes) => {
+                    if (err) return done(err);
+                    const adminToken = adminLoginRes.body.token;
+
+                    request(app)
+                        .post('/api/departments')
+                        .set('Authorization', `Bearer ${adminToken}`)
+                        .send(department)
+                        .end((err, createRes) => {
+                            if (err) return done(err);
+                            const departmentId = createRes.body.department.id;
+
+                            request(app)
+                                .post('/api/auth/login')
+                                .send(employeeCredentials)
+                                .end((err, employeeLoginRes) => {
+                                    if (err) return done(err);
+                                    const employeeToken = employeeLoginRes.body.token;
+
+                                    request(app)
+                                        .delete(`/api/departments/${departmentId}`)
+                                        .set('Authorization', `Bearer ${employeeToken}`)
+                                        .expect(403)
+                                        .end((err, res) => {
+                                            if (err) return done(err);
+                                            expect(res.body).to.have.property('message', 'Admin access required');
+                                            done();
+                                        });
+                                });
+                        });
+                });
+        });
+        it('should return 404 if department not found', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    request(app)
+                        .delete('/api/departments/999')
+                        .set('Authorization', `Bearer ${token}`)
+                        .expect(404)
+                        .end((err, res) => {
+                            if (err) return done(err);
+                            expect(res.body).to.have.property('message', 'Department not found');
+                            done();
+                        });
+                });
+        });
+    });
 });
