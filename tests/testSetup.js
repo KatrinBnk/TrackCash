@@ -20,6 +20,20 @@ export const setupDatabase = async () => {
         ['admin1', adminPassword, 'admin']
     );
 
+    // Тестового менеджера
+    const managerPassword = await bcrypt.hash('123456', 10);
+    await db.query(
+        'INSERT INTO Users (username, password, role) VALUES (?, ?, ?)',
+        ['manager1', managerPassword, 'manager']
+    );
+
+    // Тестового сотрудника
+    const employeePassword = await bcrypt.hash('123456', 10);
+    await db.query(
+        'INSERT INTO Users (username, password, role) VALUES (?, ?, ?)',
+        ['employee1', employeePassword, 'employee']
+    );
+
     // Создаём категорию
     const [categoryResult] = await db.query(
         'INSERT INTO Categories (name, department_id) VALUES (?, ?)',
