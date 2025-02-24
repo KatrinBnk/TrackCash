@@ -37,3 +37,40 @@ export const getTransactions = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
+export const updateTransaction = async (req, res) => {
+    const { id } = req.params;
+    const { category_id, type, amount, date, comment } = req.body;
+    const userId = req.user.id;
+
+    try {
+        // Проверяем, существует ли транзакция и принадлежит ли она сотруднику
+        const [transaction] = await db.query('SELECT * FROM Transactions WHERE id = ?', [id]);
+        if (!transaction.length) {
+            return res.status(404).json({ message: 'Transaction not found' });
+        }
+        if (transaction[0].user_id !== userId) {
+            return res.status(403).json({ message: 'You can only update your own transactions' });
+        }
+
+        // Собираем данные для обновления, используя существующие значения, если поля не указаны
+        const updateData = {
+            category_id: category_id || transaction[0].category_id,
+            type: type || transaction[0].type,
+            amount: amount !== undefined ? parseFloat(amount) : parseFloat(transaction[0].amount),
+            date: date || transaction[0].date,
+            comment: comment || transaction[0].comment,
+        };
+
+        // Проверяем, что все обязательные поля заполнены (даже если они из старых данных)
+        if (!updateData.category_id || !updateData.type || !updateData.amount || !updateData.date) {
+            return res.status(400).json({ message: 'All required fields must be provided' });
+        }
+
+        const updatedTransaction = await Transaction.update(id, updateData);
+        res.status(200).json({ message: 'Transaction updated successfully', transaction: updatedTransaction });
+    } catch (err) {
+        console.error('Error updating transaction:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};

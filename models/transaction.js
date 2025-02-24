@@ -27,12 +27,20 @@ class Transaction {
         }
 
         const [transactions] = await db.query(query, params);
-
         return transactions.map(tx => ({
             ...tx,
             amount: parseFloat(tx.amount),
             date: new Date(tx.date).toISOString().split('T')[0]
         }));
+    }
+
+    static async update(id, { category_id, type, amount, date, comment }) {
+        await db.query(
+            'UPDATE Transactions SET category_id = ?, type = ?, amount = ?, date = ?, comment = ? WHERE id = ?',
+            [category_id, type, amount, date, comment || null, id]
+        );
+        const [updated] = await db.query('SELECT * FROM Transactions WHERE id = ?', [id]);
+        return updated[0];
     }
 }
 
