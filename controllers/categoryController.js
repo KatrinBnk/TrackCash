@@ -35,7 +35,7 @@ export const createCategory = async (req, res) => {
 export const getCategories = async (req, res) => {
     const userId = req.user.id;
     const userRole = req.user.role;
-    const nameFilter = req.query.name; // Получаем query-параметр name
+    const nameFilter = req.query.name;
 
     try {
         if (userRole !== 'manager' && userRole !== 'employee') {
@@ -61,6 +61,49 @@ export const getCategories = async (req, res) => {
         res.status(200).json(categories);
     } catch (err) {
         console.error('Error fetching categories:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
+
+export const updateCategory = async (req, res) => {
+    const { id } = req.params;
+    const { name } = req.body;
+    const managerId = req.user.id;
+
+    if (!name) {
+        return res.status(400).json({ message: 'Category name is required' });
+    }
+
+    try {
+        // Находим отдел менеджера
+        const [department] = await db.query('SELECT * FROM Departments WHERE manager_id = ?', [managerId]);
+        if (!department.length) {
+            return res.status(400).json({ message: 'Manager is not assigned to a department' });
+        }
+        const departmentId = department[0].id;
+
+        // Проверяем, существует ли категория и принадлежит ли она отделу менеджера
+        const [category] = await db.query('SELECT * FROM Categories WHERE id = ?', [id]);
+        if (!category.length) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+        if (category[0].department_id !== departmentId) {
+            return res.status(403).json({ message: 'Category does not belong to your department' });
+        }
+
+        // Проверяем уникальность имени в отделе
+        const [existingCategory] = await db.query(
+            'SELECT * FROM Categories WHERE name = ? AND department_id = ? AND id != ?',
+            [name, departmentId, id]
+        );
+        if (existingCategory.length) {
+            return res.status(400).json({ message: 'Category name already exists in your department' });
+        }
+
+        const updatedCategory = await Category.update(id, { name });
+        res.status(200).json({ message: 'Category updated successfully', category: updatedCategory });
+    } catch (err) {
+        console.error('Error updating category:', err);
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };

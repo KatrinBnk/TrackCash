@@ -22,6 +22,12 @@ class Category {
         const [categories] = await db.query(query, params);
         return categories;
     }
+
+    static async update(id, { name }) {
+        await db.query('UPDATE Categories SET name = ? WHERE id = ?', [name, id]);
+        const [updated] = await db.query('SELECT * FROM Categories WHERE id = ?', [id]);
+        return updated[0];
+    }
 }
 
 export default Category;
