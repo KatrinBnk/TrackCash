@@ -23,3 +23,10 @@ export const requireAdmin = (req, res, next) => {
     }
     next();
 };
+
+export const requireEmployee = (req, res, next) => {
+    if (req.user.role !== 'employee') {
+        return res.status(403).json({ message: 'Employee access required' });
+    }
+    next();
+};

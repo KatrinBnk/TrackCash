@@ -1,9 +1,14 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../server.js';
-import { setupDatabase } from "./testSetup.js";
+import { setupDatabase } from './testSetup.js';
 
-before(setupDatabase);
+let categoryId;
+
+before(async () => {
+    const setup = await setupDatabase();
+    categoryId = setup.categoryId;
+});
 
 describe('Transactions API', () => {
     describe('POST /api/transactions', () => {
@@ -11,14 +16,13 @@ describe('Transactions API', () => {
             const adminCredentials = { username: 'admin1', password: '123456' };
             const employeeData = { username: 'employee1', password: '789101', role: 'employee' };
             const transaction = {
-                category_id: 1,
+                category_id: categoryId,
                 type: 'expense',
                 amount: 50.00,
                 date: '2025-02-23',
                 comment: 'Lunch expense',
             };
 
-            // Сначала регистрируем сотрудника
             request(app)
                 .post('/api/auth/login')
                 .send(adminCredentials)
@@ -62,7 +66,7 @@ describe('Transactions API', () => {
         it('should return 403 if non-employee tries to add a transaction', (done) => {
             const adminCredentials = { username: 'admin1', password: '123456' };
             const transaction = {
-                category_id: 1,
+                category_id: categoryId,
                 type: 'expense',
                 amount: 100.00,
                 date: '2025-02-23',
