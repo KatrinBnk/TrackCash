@@ -26,13 +26,11 @@ export const updateDepartment = async (req, res) => {
     }
 
     try {
-        // Проверяем, существует ли отдел
         const [existingDepartment] = await db.query('SELECT * FROM Departments WHERE id = ?', [id]);
         if (!existingDepartment.length) {
             return res.status(404).json({ message: 'Department not found' });
         }
 
-        // Если указан manager_id, проверяем, что он менеджер и не привязан к другому отделу
         if (manager_id) {
             const [manager] = await db.query('SELECT * FROM Users WHERE id = ? AND role = "manager"', [manager_id]);
             if (!manager.length) {
@@ -52,6 +50,16 @@ export const updateDepartment = async (req, res) => {
         res.status(200).json({ message: 'Department updated successfully', department });
     } catch (err) {
         console.error('Error updating department:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
+
+export const getDepartments = async (req, res) => {
+    try {
+        const departments = await Department.getAll();
+        res.status(200).json(departments);
+    } catch (err) {
+        console.error('Error fetching departments:', err);
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };

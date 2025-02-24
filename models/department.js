@@ -17,7 +17,7 @@ class Department {
             updates.push('name = ?');
             values.push(name);
         }
-        if (manager_id !== undefined) { // Позволяем обнулить manager_id
+        if (manager_id !== undefined) {
             updates.push('manager_id = ?');
             values.push(manager_id);
         }
@@ -30,6 +30,11 @@ class Department {
 
         const [updated] = await db.query('SELECT * FROM Departments WHERE id = ?', [id]);
         return updated[0];
+    }
+
+    static async getAll() {
+        const [departments] = await db.query('SELECT * FROM Departments');
+        return departments;
     }
 }
 
