@@ -4,6 +4,7 @@ import authRoutes from './routes/auth.js';
 import transactionRoutes from './routes/transactions.js';
 import departmentRoutes from './routes/departments.js';
 import categoryRoutes from './routes/categories.js';
+import statsRoutes from './routes/stats.js';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/stats', statsRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
