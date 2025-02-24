@@ -29,7 +29,6 @@ describe('POST /api/categories', () => {
         expect(res.body.category).to.have.property('id').that.is.a('number');
         expect(res.body.category).to.have.property('department_id', managerDepartmentId);
     });
-
     it('should return 403 if non-manager tries to create a category', async () => {
         const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
         const category = { name: 'Office Supplies' };
@@ -42,7 +41,6 @@ describe('POST /api/categories', () => {
 
         expect(res.body).to.have.property('message', 'Manager access required');
     });
-
     it('should return 400 if category name is missing', async () => {
         const managerToken = await loginUser({ username: 'manager1', password: '123456' });
         const category = {};
@@ -55,7 +53,6 @@ describe('POST /api/categories', () => {
 
         expect(res.body).to.have.property('message', 'Category name is required');
     });
-
     it('should return 400 if manager is not assigned to a department', async () => {
         const adminToken = await loginUser({ username: 'admin1', password: '123456' });
         // Создаём второго менеджера без отдела
@@ -74,5 +71,20 @@ describe('POST /api/categories', () => {
             .expect(400);
 
         expect(res.body).to.have.property('message', 'Manager is not assigned to a department');
+    });
+    it('should return 400 if category name already exists in managers department', async () => {
+        const managerToken = await loginUser({ username: 'manager1', password: '123456' });
+        await request(app)
+            .post('/api/categories')
+            .set('Authorization', `Bearer ${managerToken}`)
+            .send({ name: 'Travel Expenses' });
+
+        const res = await request(app)
+            .post('/api/categories')
+            .set('Authorization', `Bearer ${managerToken}`)
+            .send({ name: 'Travel Expenses' })
+            .expect(400);
+
+        expect(res.body).to.have.property('message', 'Category name already exists in your department');
     });
 });
