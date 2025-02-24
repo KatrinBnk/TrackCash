@@ -1,6 +1,33 @@
 import Category from '../models/category.js';
 import db from '../config/db.js';
 
+const getManagerDepartmentId = async (managerId) => {
+    const [department] = await db.query('SELECT * FROM Departments WHERE manager_id = ?', [managerId]);
+    if (!department.length) {
+        throw { status: 400, message: 'Manager is not assigned to a department' };
+    }
+    return department[0].id;
+};
+
+const checkCategoryOwnership = async (id, departmentId) => {
+    const [category] = await db.query('SELECT * FROM Categories WHERE id = ?', [id]);
+    if (!category.length) {
+        throw { status: 404, message: 'Category not found' };
+    }
+    if (category[0].department_id !== departmentId) {
+        throw { status: 403, message: 'Category does not belong to your department' };
+    }
+    return category[0];
+};
+
+const handleError = (res, err, action) => {
+    if (err.status) {
+        return res.status(err.status).json({ message: err.message });
+    }
+    console.error(`Error ${action} category:`, err);
+    return res.status(500).json({ message: 'Server error', error: err.message });
+};
+
 export const createCategory = async (req, res) => {
     const { name } = req.body;
     const managerId = req.user.id;
@@ -10,11 +37,7 @@ export const createCategory = async (req, res) => {
     }
 
     try {
-        const [department] = await db.query('SELECT * FROM Departments WHERE manager_id = ?', [managerId]);
-        if (!department.length) {
-            return res.status(400).json({ message: 'Manager is not assigned to a department' });
-        }
-        const departmentId = department[0].id;
+        const departmentId = await getManagerDepartmentId(managerId);
 
         const [existingCategory] = await db.query(
             'SELECT * FROM Categories WHERE name = ? AND department_id = ?',
@@ -27,8 +50,7 @@ export const createCategory = async (req, res) => {
         const category = await Category.create({ name, departmentId });
         res.status(201).json({ message: 'Category created successfully', category });
     } catch (err) {
-        console.error('Error creating category:', err);
-        res.status(500).json({ message: 'Server error', error: err.message });
+        handleError(res, err, 'creating');
     }
 };
 
@@ -44,11 +66,7 @@ export const getCategories = async (req, res) => {
 
         let departmentId;
         if (userRole === 'manager') {
-            const [department] = await db.query('SELECT * FROM Departments WHERE manager_id = ?', [userId]);
-            if (!department.length) {
-                return res.status(400).json({ message: 'Manager is not assigned to a department' });
-            }
-            departmentId = department[0].id;
+            departmentId = await getManagerDepartmentId(userId);
         } else if (userRole === 'employee') {
             const [user] = await db.query('SELECT department_id FROM Users WHERE id = ?', [userId]);
             if (!user.length || !user[0].department_id) {
@@ -60,8 +78,7 @@ export const getCategories = async (req, res) => {
         const categories = await Category.getByDepartmentId(departmentId, nameFilter);
         res.status(200).json(categories);
     } catch (err) {
-        console.error('Error fetching categories:', err);
-        res.status(500).json({ message: 'Server error', error: err.message });
+        handleError(res, err, 'fetching');
     }
 };
 
@@ -75,23 +92,9 @@ export const updateCategory = async (req, res) => {
     }
 
     try {
-        // Находим отдел менеджера
-        const [department] = await db.query('SELECT * FROM Departments WHERE manager_id = ?', [managerId]);
-        if (!department.length) {
-            return res.status(400).json({ message: 'Manager is not assigned to a department' });
-        }
-        const departmentId = department[0].id;
+        const departmentId = await getManagerDepartmentId(managerId);
+        await checkCategoryOwnership(id, departmentId);
 
-        // Проверяем, существует ли категория и принадлежит ли она отделу менеджера
-        const [category] = await db.query('SELECT * FROM Categories WHERE id = ?', [id]);
-        if (!category.length) {
-            return res.status(404).json({ message: 'Category not found' });
-        }
-        if (category[0].department_id !== departmentId) {
-            return res.status(403).json({ message: 'Category does not belong to your department' });
-        }
-
-        // Проверяем уникальность имени в отделе
         const [existingCategory] = await db.query(
             'SELECT * FROM Categories WHERE name = ? AND department_id = ? AND id != ?',
             [name, departmentId, id]
@@ -103,8 +106,7 @@ export const updateCategory = async (req, res) => {
         const updatedCategory = await Category.update(id, { name });
         res.status(200).json({ message: 'Category updated successfully', category: updatedCategory });
     } catch (err) {
-        console.error('Error updating category:', err);
-        res.status(500).json({ message: 'Server error', error: err.message });
+        handleError(res, err, 'updating');
     }
 };
 
@@ -113,32 +115,17 @@ export const deleteCategory = async (req, res) => {
     const managerId = req.user.id;
 
     try {
-        const [department] = await db.query('SELECT * FROM Departments WHERE manager_id = ?', [managerId]);
-        if (!department.length) {
-            return res.status(400).json({ message: 'Manager is not assigned to a department' });
-        }
-        const departmentId = department[0].id;
-
-        const [category] = await db.query('SELECT * FROM Categories WHERE id = ?', [id]);
-        if (!category.length) {
-            return res.status(404).json({ message: 'Category not found' });
-        }
-        if (category[0].department_id !== departmentId) {
-            return res.status(403).json({ message: 'Category does not belong to your department' });
-        }
+        const departmentId = await getManagerDepartmentId(managerId);
+        await checkCategoryOwnership(id, departmentId);
 
         const [transactions] = await db.query('SELECT * FROM Transactions WHERE category_id = ?', [id]);
         if (transactions.length > 0) {
             return res.status(400).json({ message: 'Cannot delete category used in transactions' });
         }
 
-        const deleted = await Category.delete(id);
-        if (!deleted) {
-            return res.status(404).json({ message: 'Category not found' });
-        }
+        await Category.delete(id);
         res.status(200).json({ message: 'Category deleted successfully' });
     } catch (err) {
-        console.error('Error deleting category:', err);
-        res.status(500).json({ message: 'Server error', error: err.message });
+        handleError(res, err, 'deleting');
     }
 };
