@@ -31,7 +31,7 @@ CREATE TABLE Categories (
 CREATE TABLE Transactions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    category_id INT NOT NULL,
+    category_id INT,
     type ENUM('expense', 'income') NOT NULL, -- Расход или доход
     amount DECIMAL(10, 2) NOT NULL,
     date DATE NOT NULL,
