@@ -7,7 +7,6 @@ import { loginUser, createDepartment, getUserIdByUsername } from '../testHelpers
 
 let employeeDepartmentId;
 let expenseCategoryId;
-let incomeCategoryId;
 let employeeId;
 
 before(async () => {
@@ -27,13 +26,6 @@ before(async () => {
         .set('Authorization', `Bearer ${managerToken}`)
         .send({ name: 'Travel Expenses' });
     expenseCategoryId = expenseCategoryRes.body.category.id;
-
-    // Создаём категорию для доходов
-    const incomeCategoryRes = await request(app)
-        .post('/api/categories')
-        .set('Authorization', `Bearer ${managerToken}`)
-        .send({ name: 'Income' });
-    incomeCategoryId = incomeCategoryRes.body.category.id;
 });
 
 describe('POST /api/transactions', () => {
@@ -86,7 +78,6 @@ describe('POST /api/transactions', () => {
         const managerToken = await loginUser({ username: 'manager1', password: '123456' });
         const income = {
             user_id: employeeId,
-            category_id: incomeCategoryId,
             type: 'income',
             amount: 1000.00,
             date: '2025-02-25',
@@ -105,14 +96,12 @@ describe('POST /api/transactions', () => {
         expect(res.body.transaction).to.have.property('date', '2025-02-25');
         expect(res.body.transaction).to.have.property('comment', 'Bonus for Q1');
         expect(res.body.transaction).to.have.property('user_id', employeeId);
-        expect(res.body.transaction).to.have.property('category_id', incomeCategoryId);
     });
 
     it('should return 403 if non-manager tries to add an income transaction', async () => {
         const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
         const income = {
             user_id: employeeId,
-            category_id: incomeCategoryId,
             type: 'income',
             amount: 500.00,
             date: '2025-02-25',
@@ -132,7 +121,6 @@ describe('POST /api/transactions', () => {
         const managerToken = await loginUser({ username: 'manager1', password: '123456' });
         const income = {
             user_id: 999,
-            category_id: incomeCategoryId,
             type: 'income',
             amount: 1000.00,
             date: '2025-02-25',
