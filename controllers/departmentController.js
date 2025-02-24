@@ -2,14 +2,14 @@ import Department from '../models/department.js';
 import db from '../config/db.js';
 
 export const createDepartment = async (req, res) => {
-    const { name } = req.body;
+    const { name, manager_id } = req.body;
 
     if (!name) {
         return res.status(400).json({ message: 'Department name is required' });
     }
 
     try {
-        const department = await Department.create({ name });
+        const department = await Department.create({ name, manager_id });
         res.status(201).json({ message: 'Department created successfully', department });
     } catch (err) {
         console.error('Error creating department:', err);

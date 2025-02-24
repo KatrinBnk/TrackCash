@@ -1,12 +1,12 @@
 import db from '../config/db.js';
 
 class Department {
-    static async create({ name }) {
+    static async create({ name, manager_id }) {
         const [result] = await db.query(
             'INSERT INTO Departments (name, manager_id) VALUES (?, ?)',
-            [name, null]
+            [name, manager_id || null]
         );
-        return { id: result.insertId, name };
+        return { id: result.insertId, name, manager_id };
     }
 
     static async update(id, { name, manager_id }) {

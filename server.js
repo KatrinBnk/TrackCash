@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import transactionRoutes from './routes/transactions.js';
 import departmentRoutes from './routes/departments.js';
+import categoryRoutes from './routes/categories.js';
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/departments', departmentRoutes);
+app.use('/api/categories', categoryRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
