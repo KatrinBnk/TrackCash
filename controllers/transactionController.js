@@ -2,17 +2,57 @@ import Transaction from '../models/transaction.js';
 import db from '../config/db.js';
 
 export const addTransaction = async (req, res) => {
-    const { category_id, type, amount, date, comment } = req.body;
-    const user_id = req.user.id;
+    const { user_id, category_id, type, amount, date, comment } = req.body;
+    const requesterId = req.user.id;
 
-    if (!category_id || !type || !amount || !date) {
-        return res.status(400).json({ message: 'All required fields must be provided' });
+    // Проверяем обязательные поля в зависимости от типа
+    if (!user_id || !type || !amount || !date) {
+        console.log("All required fields (user_id, type, amount, date) must be provided");
+        console.log(user_id, type, amount, date);
+        return res.status(400).json({ message: 'All required fields (user_id, type, amount, date) must be provided' });
     }
 
     try {
+        // Проверяем тип транзакции и роль
+        if (type === 'expense') {
+            if (requesterId !== user_id) {
+                return res.status(403).json({ message: 'You can only add expenses for yourself' });
+            }
+            const [user] = await db.query('SELECT department_id FROM Users WHERE id = ? AND role = ?', [user_id, 'employee']);
+            if (!user.length || !user[0].department_id) {
+                console.log("User is not assigned to a department");
+                return res.status(400).json({ message: 'User is not assigned to a department' });
+            }
+            const [category] = await db.query('SELECT * FROM Categories WHERE id = ?', [category_id]);
+            if (!category.length) {
+                console.log('invalid category_id');
+                return res.status(400).json({ message: 'Invalid category_id' });
+            }
+            if (category[0].department_id !== user[0].department_id) {
+                console.log("Category doesn't belong to your department");
+                return res.status(400).json({ message: 'Category does not belong to your department' });
+            }
+        }else if (type === 'income') {
+            // Для доходов — только менеджер может добавлять для сотрудников своего отдела
+            const [department] = await db.query('SELECT * FROM Departments WHERE manager_id = ?', [requesterId]);
+            if (!department.length) {
+                return res.status(400).json({ message: 'Manager is not assigned to a department' });
+            }
+            const departmentId = department[0].id;
+
+            const [employee] = await db.query('SELECT * FROM Users WHERE id = ? AND department_id = ? AND role = ?', [user_id, departmentId, 'employee']);
+            if (!employee.length) {
+                return res.status(400).json({ message: 'Invalid user_id or user not in your department' });
+            }
+            // Для доходов category_id необязателен
+        } else {
+            return res.status(400).json({ message: 'Invalid transaction type. Use "expense" or "income"' });
+        }
+
+        // Создаём транзакцию
         const transaction = await Transaction.create({
             user_id,
-            category_id,
+            category_id: category_id || null, // Позволяем null для доходов
             type,
             amount,
             date,
@@ -44,7 +84,6 @@ export const updateTransaction = async (req, res) => {
     const userId = req.user.id;
 
     try {
-        // Проверяем, существует ли транзакция и принадлежит ли она сотруднику
         const [transaction] = await db.query('SELECT * FROM Transactions WHERE id = ?', [id]);
         if (!transaction.length) {
             return res.status(404).json({ message: 'Transaction not found' });
@@ -53,7 +92,6 @@ export const updateTransaction = async (req, res) => {
             return res.status(403).json({ message: 'You can only update your own transactions' });
         }
 
-        // Собираем данные для обновления, используя существующие значения, если поля не указаны
         const updateData = {
             category_id: category_id || transaction[0].category_id,
             type: type || transaction[0].type,
@@ -62,7 +100,6 @@ export const updateTransaction = async (req, res) => {
             comment: comment || transaction[0].comment,
         };
 
-        // Проверяем, что все обязательные поля заполнены (даже если они из старых данных)
         if (!updateData.category_id || !updateData.type || !updateData.amount || !updateData.date) {
             return res.status(400).json({ message: 'All required fields must be provided' });
         }

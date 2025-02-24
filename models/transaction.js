@@ -4,7 +4,7 @@ class Transaction {
     static async create({ user_id, category_id, type, amount, date, comment }) {
         const [result] = await db.query(
             'INSERT INTO Transactions (user_id, category_id, type, amount, date, comment) VALUES (?, ?, ?, ?, ?, ?)',
-            [user_id, category_id, type, amount, date, comment || null]
+            [user_id, category_id || null, type, amount, date, comment || null]
         );
         return { id: result.insertId, user_id, category_id, type, amount, date, comment };
     }
@@ -37,10 +37,14 @@ class Transaction {
     static async update(id, { category_id, type, amount, date, comment }) {
         await db.query(
             'UPDATE Transactions SET category_id = ?, type = ?, amount = ?, date = ?, comment = ? WHERE id = ?',
-            [category_id, type, amount, date, comment || null, id]
+            [category_id || null, type, amount, date, comment || null, id]
         );
         const [updated] = await db.query('SELECT * FROM Transactions WHERE id = ?', [id]);
-        return updated[0];
+        return {
+            ...updated[0],
+            amount: parseFloat(updated[0].amount),
+            date: new Date(updated[0].date).toISOString().split('T')[0]
+        };
     }
 
     static async delete(id) {
