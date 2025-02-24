@@ -327,7 +327,6 @@ describe('Departments API', () => {
                         });
                 });
         });
-
         it('should allow manager to view departments', (done) => {
             const managerCredentials = { username: 'manager1', password: '123456' };
 
@@ -349,7 +348,6 @@ describe('Departments API', () => {
                         });
                 });
         });
-
         it('should allow employee to view departments', (done) => {
             const employeeCredentials = { username: 'employee1', password: '123456' };
 
@@ -371,10 +369,158 @@ describe('Departments API', () => {
                         });
                 });
         });
-
         it('should return 401 if no token provided', (done) => {
             request(app)
                 .get('/api/departments')
+                .expect(401)
+                .end((err, res) => {
+                    if (err) return done(err);
+                    expect(res.body).to.have.property('message', 'Access token required');
+                    done();
+                });
+        });
+    });
+
+    describe('GET /api/departments/:id', () => {
+        it('should allow admin to view a department by id', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const department = { name: 'HR Department' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    request(app)
+                        .post('/api/departments')
+                        .set('Authorization', `Bearer ${token}`)
+                        .send(department)
+                        .end((err, createRes) => {
+                            if (err) return done(err);
+                            const departmentId = createRes.body.department.id;
+
+                            request(app)
+                                .get(`/api/departments/${departmentId}`)
+                                .set('Authorization', `Bearer ${token}`)
+                                .expect(200)
+                                .end((err, res) => {
+                                    if (err) return done(err);
+                                    expect(res.body).to.be.an('object');
+                                    expect(res.body).to.have.property('name', 'HR Department');
+                                    expect(res.body).to.have.property('id', departmentId);
+                                    done();
+                                });
+                        });
+                });
+        });
+        it('should allow manager to view a department by id', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const managerCredentials = { username: 'manager1', password: '123456' };
+            const department = { name: 'Finance Department' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, adminLoginRes) => {
+                    if (err) return done(err);
+                    const adminToken = adminLoginRes.body.token;
+
+                    request(app)
+                        .post('/api/departments')
+                        .set('Authorization', `Bearer ${adminToken}`)
+                        .send(department)
+                        .end((err, createRes) => {
+                            if (err) return done(err);
+                            const departmentId = createRes.body.department.id;
+
+                            request(app)
+                                .post('/api/auth/login')
+                                .send(managerCredentials)
+                                .end((err, managerLoginRes) => {
+                                    if (err) return done(err);
+                                    const managerToken = managerLoginRes.body.token;
+
+                                    request(app)
+                                        .get(`/api/departments/${departmentId}`)
+                                        .set('Authorization', `Bearer ${managerToken}`)
+                                        .expect(200)
+                                        .end((err, res) => {
+                                            if (err) return done(err);
+                                            expect(res.body).to.be.an('object');
+                                            expect(res.body).to.have.property('name', 'Finance Department');
+                                            done();
+                                        });
+                                });
+                        });
+                });
+        });
+        it('should allow employee to view a department by id', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+            const employeeCredentials = { username: 'employee1', password: '123456' };
+            const department = { name: 'Support Department' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, adminLoginRes) => {
+                    if (err) return done(err);
+                    const adminToken = adminLoginRes.body.token;
+
+                    request(app)
+                        .post('/api/departments')
+                        .set('Authorization', `Bearer ${adminToken}`)
+                        .send(department)
+                        .end((err, createRes) => {
+                            if (err) return done(err);
+                            const departmentId = createRes.body.department.id;
+
+                            request(app)
+                                .post('/api/auth/login')
+                                .send(employeeCredentials)
+                                .end((err, employeeLoginRes) => {
+                                    if (err) return done(err);
+                                    const employeeToken = employeeLoginRes.body.token;
+
+                                    request(app)
+                                        .get(`/api/departments/${departmentId}`)
+                                        .set('Authorization', `Bearer ${employeeToken}`)
+                                        .expect(200)
+                                        .end((err, res) => {
+                                            if (err) return done(err);
+                                            expect(res.body).to.be.an('object');
+                                            expect(res.body).to.have.property('name', 'Support Department');
+                                            done();
+                                        });
+                                });
+                        });
+                });
+        });
+        it('should return 404 if department not found', (done) => {
+            const adminCredentials = { username: 'admin1', password: '123456' };
+
+            request(app)
+                .post('/api/auth/login')
+                .send(adminCredentials)
+                .end((err, loginRes) => {
+                    if (err) return done(err);
+                    const token = loginRes.body.token;
+
+                    request(app)
+                        .get('/api/departments/999') // Несуществующий ID
+                        .set('Authorization', `Bearer ${token}`)
+                        .expect(404)
+                        .end((err, res) => {
+                            if (err) return done(err);
+                            expect(res.body).to.have.property('message', 'Department not found');
+                            done();
+                        });
+                });
+        });
+        it('should return 401 if no token provided', (done) => {
+            request(app)
+                .get('/api/departments/1')
                 .expect(401)
                 .end((err, res) => {
                     if (err) return done(err);
