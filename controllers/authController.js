@@ -41,7 +41,7 @@ export const login = async (req, res) => {
         const token = jwt.sign(
             { id: user.id, username: user.username, role: user.role },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' } // Токен истекает через 1 час (позже есть резон увеличить это время)
+            { expiresIn: '1h' }
         );
 
         res.status(200).json({
@@ -50,6 +50,22 @@ export const login = async (req, res) => {
             user: { id: user.id, username: user.username, role: user.role },
         });
     } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
+
+export const logout = async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Access token required' });
+    }
+
+    try {
+        // Перекладываю ответственность за удаление токена на клиента
+        res.status(200).json({ message: 'Logged out successfully' });
+    } catch (err) {
+        console.error('Error during logout:', err);
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };

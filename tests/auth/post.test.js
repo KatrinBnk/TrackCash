@@ -76,4 +76,24 @@ describe('POST /api/auth', () => {
             expect(res.body).to.have.property('message', 'Invalid username or password');
         });
     });
+
+    describe('POST /api/auth/logout', () => {
+        it('should allow a user to logout successfully', async () => {
+            const userToken = await loginUser({ username: 'admin1', password: '123456' });
+
+            const res = await request(app)
+                .post('/api/auth/logout')
+                .set('Authorization', `Bearer ${userToken}`)
+                .expect(200);
+
+            expect(res.body).to.have.property('message', 'Logged out successfully');
+        });
+        it('should return 401 if no token is provided for logout', async () => {
+            const res = await request(app)
+                .post('/api/auth/logout')
+                .expect(401);
+
+            expect(res.body).to.have.property('message', 'Access token required');
+        });
+    });
 });
