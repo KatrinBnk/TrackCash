@@ -8,5 +8,6 @@ router.post('/', authenticateToken, requireAdmin, departmentController.createDep
 router.put('/:id', authenticateToken, requireAdmin, departmentController.updateDepartment);
 router.get('/', authenticateToken, departmentController.getDepartments);
 router.get('/:id', authenticateToken, departmentController.getDepartmentById);
+router.delete('/:id', authenticateToken, requireAdmin, departmentController.deleteDepartment);
 
 export default router;

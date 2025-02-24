@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import request from 'supertest';
 import app from '../server.js';
 import { setupDatabase } from './testSetup.js';
+import db from "../config/db.js";
 
 before(setupDatabase);
 
@@ -321,7 +322,7 @@ describe('Departments API', () => {
                                     if (err) return done(err);
                                     expect(res.body).to.be.an('array');
                                     expect(res.body).to.have.lengthOf.at.least(1);
-                                    expect(res.body[0]).to.have.property('name', 'Test Department');
+                                    expect(res.body[0]).to.have.property('name', 'IT Department 1');
                                     done();
                                 });
                         });

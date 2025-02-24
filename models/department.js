@@ -41,6 +41,10 @@ class Department {
         const [departments] = await db.query('SELECT * FROM Departments WHERE id = ?', [id]);
         return departments[0] || null;
     }
+    static async delete(id) {
+        const [result] = await db.query('DELETE FROM Departments WHERE id = ?', [id]);
+        return result.affectedRows > 0;
+    }
 }
 
 export default Department;

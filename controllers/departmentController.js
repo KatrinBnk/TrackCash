@@ -78,3 +78,24 @@ export const getDepartmentById = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
+export const deleteDepartment = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const [categories] = await db.query('SELECT * FROM Categories WHERE department_id = ?', [id]);
+        const [users] = await db.query('SELECT * FROM Users WHERE department_id = ?', [id]);
+        if (categories.length > 0 || users.length > 0) {
+            return res.status(400).json({ message: 'Cannot delete department with associated categories or users' });
+        }
+
+        const deleted = await Department.delete(id);
+        if (!deleted) {
+            return res.status(404).json({ message: 'Department not found' });
+        }
+        res.status(200).json({ message: 'Department deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting department:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
