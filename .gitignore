@@ -1,5 +1,7 @@
 # Зависимости Node.js
 node_modules/
+/server/node_modules/
+/client/node_modules/
 npm-debug.log
 yarn.lock
 package-lock.json
@@ -20,3 +22,5 @@ build/
 
 # ОС-специфичные файлы
 Thumbs.db       # Windows
+
+
