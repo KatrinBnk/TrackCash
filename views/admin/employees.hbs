@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора - Управление пользователями - CashTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Стили остаются такими же, как в предыдущем примере */
+        body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #F7F2E8;
+            color: #1F2526;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .welcome-message {
+            background-color: #7255A5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            color: #F9F9F9;
+        }
+
+        .welcome-message h1 {
+            color: #F9F9F9;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            color: #F9F9F9;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .user-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            color: #1F2526;
+            border: 1px solid #F28C38;
+        }
+
+        .user-form input {
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #7255A5;
+            border-radius: 4px;
+            background-color: #F7F2E8;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            width: 200px;
+            margin-bottom: 10px;
+        }
+
+        .user-form input::placeholder {
+            color: #7255A5;
+        }
+
+        .user-form select {
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #7255A5;
+            border-radius: 4px;
+            background-color: #F7F2E8;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            width: 200px;
+            cursor: pointer;
+        }
+
+        .user-form button {
+            padding: 10px 20px;
+            background-color: #BBFBAC;
+            color: #1F2526;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .user-form button:hover {
+            background-color: #A5E698;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #F28C38;
+            border-radius: 4px;
+            background-color: #fff;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+        }
+
+        .search-bar input::placeholder {
+            color: #7255A5;
+            font-weight: 400;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: #1F2526;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #7255A5;
+        }
+
+        th {
+            background-color: #7255A5;
+            color: #F9F9F9;
+            font-weight: 600;
+        }
+
+        td {
+            color: #1F2526;
+            font-weight: 400;
+        }
+
+        .actions button {
+            padding: 5px 10px;
+            margin-right: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .actions .edit-btn {
+            background-color: #BBFBAC;
+            color: #1F2526;
+        }
+
+        .actions .edit-btn:hover {
+            background-color: #A5E698;
+        }
+
+        .actions .delete-btn {
+            background-color: #F28C38;
+            color: #1F2526;
+        }
+
+        .actions .delete-btn:hover {
+            background-color: #D97A30;
+        }
+
+        .actions .save-btn {
+            background-color: #BBFBAC;
+            color: #1F2526;
+            display: none;
+        }
+
+        .actions .save-btn:hover {
+            background-color: #A5E698;
+        }
+
+        .actions .cancel-btn {
+            background-color: #F28C38;
+            color: #1F2526;
+            display: none;
+        }
+
+        .actions .cancel-btn:hover {
+            background-color: #D97A30;
+        }
+
+        .actions.editing .save-btn,
+        .actions.editing .cancel-btn {
+            display: inline-block;
+        }
+
+        .actions.editing .edit-btn,
+        .actions.editing .delete-btn {
+            display: none;
+        }
+
+        td[contenteditable="true"] {
+            background-color: #F7F2E8;
+            border: 1px solid #7255A5;
+            padding: 8px;
+        }
+        .filter-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-bar select,
+        .filter-bar input {
+            padding: 10px;
+            border: 1px solid #F28C38;
+            border-radius: 4px;
+            background-color: #fff;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+        }
+
+        .filter-bar select {
+            width: 200px;
+        }
+
+        .filter-bar input {
+            width: 150px;
+        }
+    </style>
+</head>
+<body>
+{{> adminHeader}}
+<div class="container">
+    <div class="welcome-message">
+        <h1>Добро пожаловать, Администратор!</h1>
+        <p>Страница управления пользователями</p>
+    </div>
+
+    <div class="user-form">
+        <input type="text" id="user-username" placeholder="Логин" required maxlength="30">
+        <input type="text" id="user-surname" placeholder="Фамилия" required maxlength="50">
+        <input type="text" id="user-name" placeholder="Имя" required maxlength="50">
+        <input type="text" id="user-patronymic" placeholder="Отчество" maxlength="50">
+        <select id="user-role" required>
+            <option value="" disabled selected>Выберите роль</option>
+            <option value="admin">Администратор</option>
+            <option value="manager">Менеджер</option>
+            <option value="employee">Сотрудник</option>
+        </select>
+        <input type="number" id="user-department" placeholder="ID отдела">
+        <input type="password" id="user-password" placeholder="Пароль" required>
+        <button id="submit-user">Зарегистрировать пользователя</button>
+    </div>
+
+    <!-- Добавляем панель фильтрации -->
+    <div class="filter-bar">
+        <input type="text" id="search-user" placeholder="Поиск по любому полю">
+        <select id="filter-role">
+            <option value="">Все роли</option>
+            <option value="admin">Администратор</option>
+            <option value="manager">Менеджер</option>
+            <option value="employee">Сотрудник</option>
+        </select>
+        <input type="number" id="filter-department" placeholder="ID отдела">
+    </div>
+
+    <table id="users-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Логин</th>
+            <th>Фамилия</th>
+            <th>Имя</th>
+            <th>Отчество</th>
+            <th>Роль</th>
+            <th>ID отдела</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody id="users-body"></tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        $.ajaxSetup({
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+        });
+
+        function loadUsers(searchQuery = '', roleFilter = '', departmentFilter = '') {
+            let url = '/api/users';
+            const params = new URLSearchParams();
+
+            if (roleFilter) params.append('role', roleFilter);
+            if (departmentFilter) params.append('department', departmentFilter);
+
+            if (params.toString()) {
+                url += `?${params.toString()}`;
+            }
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function (users) {
+                    const tbody = $('#users-body');
+                    tbody.empty();
+
+                    const filteredUsers = users.filter(user => {
+                        const searchLower = searchQuery.toLowerCase();
+                        return (
+                                (user.username?.toLowerCase() || '').includes(searchLower) ||
+                                (user.surname?.toLowerCase() || '').includes(searchLower) ||
+                                (user.name?.toLowerCase() || '').includes(searchLower) ||
+                                (user.patronymic?.toLowerCase() || '').includes(searchLower) ||
+                                (user.role?.toLowerCase() || '').includes(searchLower) ||
+                                (user.department_id?.toString() || '').includes(searchLower)
+                        );
+                    });
+
+                    filteredUsers.forEach(user => {
+                        const roleDisplay = {
+                            'admin': 'Администратор',
+                            'manager': 'Менеджер',
+                            'employee': 'Сотрудник'
+                        }[user.role] || user.role || '';
+
+                        const row = `
+                            <tr data-id="${user.id}">
+                                <td>${user.id}</td>
+                                <td>${user.username || ''}</td>
+                                <td>${user.surname || ''}</td>
+                                <td>${user.name || ''}</td>
+                                <td>${user.patronymic || ''}</td>
+                                <td data-role="${user.role}">${roleDisplay}</td>
+                                <td>${user.department_id || ''}</td>
+                                <td class="actions">
+                                    <button class="edit-btn">Редактировать</button>
+                                    <button class="delete-btn">Удалить</button>
+                                    <button class="save-btn">Сохранить</button>
+                                    <button class="cancel-btn">Отменить</button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                },
+                error: function (xhr) {
+                    alert('Ошибка загрузки пользователей: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        }
+
+        // Изначальная загрузка
+        loadUsers();
+
+        // Обработчики фильтров
+        $('#search-user').on('input', function () {
+            loadUsers($(this).val(), $('#filter-role').val(), $('#filter-department').val());
+        });
+
+        $('#filter-role').on('change', function () {
+            loadUsers($('#search-user').val(), $(this).val(), $('#filter-department').val());
+        });
+
+        $('#filter-department').on('input', function () {
+            loadUsers($('#search-user').val(), $('#filter-role').val(), $(this).val());
+        });
+
+        $('#submit-user').on('click', function () {
+            const userData = {
+                username: $('#user-username').val(),
+                surname: $('#user-surname').val(),
+                name: $('#user-name').val(),
+                patronymic: $('#user-patronymic').val(),
+                role: $('#user-role').val(),
+                department_id: $('#user-department').val() ? parseInt($('#user-department').val()) : null,
+                password: $('#user-password').val()
+            };
+
+            if (!userData.username || !userData.surname || !userData.name || !userData.role || !userData.password) {
+                alert('Обязательные поля: логин, фамилия, имя, роль и пароль!');
+                return;
+            }
+
+            $.ajax({
+                url: '/api/auth/register',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(userData),
+                success: function (response) {
+                    alert(response.message);
+                    loadUsers();
+                    $('.user-form input').val('');
+                    $('#user-role').val('');
+                },
+                error: function (xhr) {
+                    alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        });
+
+        $('#users-table').on('click', '.edit-btn', function () {
+            const row = $(this).closest('tr');
+            const actions = row.find('.actions');
+            const id = row.data('id');
+
+            const originalData = {
+                username: row.find('td:eq(1)').text(),
+                surname: row.find('td:eq(2)').text(),
+                name: row.find('td:eq(3)').text(),
+                patronymic: row.find('td:eq(4)').text(),
+                department_id: row.find('td:eq(6)').text()
+            };
+
+
+            row.find('td:not(:last-child):not(:eq(5))').attr('contenteditable', true);
+
+            actions.addClass('editing');
+
+            actions.find('.save-btn').off('click').on('click', function () {
+                const updatedData = {
+                    username: row.find('td:eq(1)').text().trim(),
+                    surname: row.find('td:eq(2)').text().trim(),
+                    name: row.find('td:eq(3)').text().trim(),
+                    patronymic: row.find('td:eq(4)').text().trim() || null,
+                    department_id: row.find('td:eq(6)').text().trim() ? parseInt(row.find('td:eq(6)').text().trim()) : null
+                };
+
+                if (!updatedData.username || !updatedData.surname || !updatedData.name || !updatedData.role) {
+                    alert('Логин, фамилия, имя и роль обязательны!');
+                    return;
+                }
+
+                $.ajax({
+                    url: `/api/users/${id}`,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(updatedData),
+                    success: function (response) {
+                        alert(response.message);
+                        actions.removeClass('editing');
+                        row.find('td:not(:last-child)').attr('contenteditable', false);
+                        loadUsers($('#search-user').val(), $('#filter-role').val(), $('#filter-department').val());
+                    },
+                    error: function (xhr) {
+                        alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                    }
+                });
+            });
+
+            actions.find('.cancel-btn').off('click').on('click', function () {
+                actions.removeClass('editing');
+                row.find('td:eq(1)').text(originalData.username);
+                row.find('td:eq(2)').text(originalData.surname);
+                row.find('td:eq(3)').text(originalData.name);
+                row.find('td:eq(4)').text(originalData.patronymic);
+                row.find('td:eq(6)').text(originalData.department_id);
+                row.find('td:not(:last-child)').attr('contenteditable', false);
+            });
+        });
+
+        $('#users-table').on('click', '.delete-btn', function () {
+            const row = $(this).closest('tr');
+            const id = row.data('id');
+
+            if (confirm('Вы уверены, что хотите удалить этого пользователя?')) {
+                $.ajax({
+                    url: `/api/users/${id}`,
+                    method: 'DELETE',
+                    success: function (response) {
+                        alert(response.message);
+                        loadUsers($('#search-user').val(), $('#filter-role').val(), $('#filter-department').val());
+                    },
+                    error: function (xhr) {
+                        alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                    }
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора - CashTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #F7F2E8; /* Cloud Dancer как основной фон */
+            color: #1F2526; /* Darkest Hour для текста */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .welcome-message {
+            background-color: #7255A5; /* Blue Violet для приветственного блока */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            color: #F9F9F9; /* Почти белый для текста */
+        }
+
+        .welcome-message h1 {
+            color: #F9F9F9; /* Почти белый для заголовка */
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            color: #F9F9F9;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .department-form {
+            background-color: #fff; /* Белый фон для формы */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            color: #1F2526;
+            border: 1px solid #F28C38; /* Exuberant Orange для рамки */
+        }
+
+        .department-form input {
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #7255A5; /* Blue Violet для рамок */
+            border-radius: 4px;
+            background-color: #F7F2E8; /* Cloud Dancer для фона ввода */
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            width: 200px; /* Фиксированная ширина */
+        }
+
+        .department-form input::placeholder {
+            color: #7255A5; /* Blue Violet для placeholder */
+        }
+
+        .department-form button {
+            padding: 10px 20px;
+            background-color: #BBFBAC; /* Светло-зелёный для кнопок */
+            color: #1F2526;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .department-form button:hover {
+            background-color: #A5E698; /* Темнее светло-зелёного при наведении */
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #F28C38; /* Exuberant Orange для рамки */
+            border-radius: 4px;
+            background-color: #fff; /* Белый фон */
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+        }
+
+        .search-bar input::placeholder {
+            color: #7255A5; /* Blue Violet для placeholder */
+            font-weight: 400;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff; /* Белый фон таблицы */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: #1F2526;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #7255A5; /* Blue Violet для линий */
+        }
+
+        th {
+            background-color: #7255A5; /* Blue Violet для заголовков */
+            color: #F9F9F9; /* Почти белый */
+            font-weight: 600;
+        }
+
+        td {
+            color: #1F2526;
+            font-weight: 400;
+        }
+
+        .actions button {
+            padding: 5px 10px;
+            margin-right: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .actions .edit-btn {
+            background-color: #BBFBAC; /* Светло-зелёный для редактирования */
+            color: #1F2526;
+        }
+
+        .actions .edit-btn:hover {
+            background-color: #A5E698;
+        }
+
+        .actions .delete-btn {
+            background-color: #F28C38; /* Exuberant Orange для удаления */
+            color: #1F2526;
+        }
+
+        .actions .delete-btn:hover {
+            background-color: #D97A30; /* Темнее Exuberant Orange */
+        }
+
+        .actions .save-btn {
+            background-color: #BBFBAC; /* Светло-зелёный для сохранения */
+            color: #1F2526;
+            display: none;
+        }
+
+        .actions .save-btn:hover {
+            background-color: #A5E698;
+        }
+
+        .actions .cancel-btn {
+            background-color: #F28C38; /* Exuberant Orange для отмены */
+            color: #1F2526;
+            display:none;
+        }
+
+        .actions .cancel-btn:hover {
+            background-color: #D97A30;
+        }
+
+        .actions.editing .save-btn,
+        .actions.editing .cancel-btn {
+            display: inline-block;
+        }
+
+        .actions.editing .edit-btn,
+        .actions.editing .delete-btn {
+            display: none;
+        }
+
+        td[contenteditable="true"] {
+            background-color: #F7F2E8; /* Cloud Dancer для редактируемых ячеек */
+            border: 1px solid #7255A5; /* Blue Violet для рамки */
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+{{> adminHeader}}
+<div class="container">
+    <div class="welcome-message">
+        <h1>Добро пожаловать, Администратор!</h1>
+        <p>Страница управления отделами</p>
+    </div>
+
+    <!-- Форма для добавления/редактирования отдела -->
+    <div class="department-form">
+        <input type="text" id="department-name" placeholder="Название отдела" required maxlength="30">
+        <input type="number" id="manager-id" placeholder="ID менеджера (опционально)">
+        <button id="submit-department">Добавить отдел</button>
+    </div>
+
+    <!-- Поле поиска -->
+    <div class="search-bar">
+        <input type="text" id="search-department" placeholder="Поиск по названию отдела">
+    </div>
+
+    <!-- Таблица отделов -->
+    <table id="departments-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>ID менеджера</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody id="departments-body"></tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // Настройка AJAX для добавления токена в заголовок
+        $.ajaxSetup({
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+        });
+
+        // Загрузка всех отделов
+        function loadDepartments(searchQuery = '') {
+            $.ajax({
+                url: '/api/departments',
+                method: 'GET',
+                success: function (departments) {
+                    const tbody = $('#departments-body');
+                    tbody.empty();
+
+                    const filteredDepartments = departments.filter(dept =>
+                            dept.name.toLowerCase().includes(searchQuery.toLowerCase())
+                    );
+
+                    filteredDepartments.forEach(dept => {
+                        const row = `
+                            <tr data-id="${dept.id}">
+                                <td>${dept.id}</td>
+                                <td>${dept.name}</td>
+                                <td>${dept.manager_id || 'Нет'}</td>
+                                <td class="actions">
+                                    <button class="edit-btn">Редактировать</button>
+                                    <button class="delete-btn">Удалить</button>
+                                    <button class="save-btn"> Сохранить</button>
+                                    <button class="cancel-btn">Отменить</button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                },
+                error: function (xhr) {
+                    alert('Ошибка загрузки отделов: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        }
+
+        // Изначальная загрузка отделов
+        loadDepartments();
+
+        // Поиск отделов
+        $('#search-department').on('input', function () {
+            const searchQuery = $(this).val();
+            loadDepartments(searchQuery);
+        });
+
+        // Добавление отдела
+        $('#submit-department').on('click', function () {
+            const name = $('#department-name').val();
+            if (!name) {
+                alert('Название отдела обязательно!');
+                return;
+            }
+
+            const managerId = $('#manager-id').val() || null;
+
+            $.ajax({
+                url: '/api/departments',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ name, manager_id: managerId }),
+                success: function (response) {
+                    alert(response.message);
+                    loadDepartments();
+                    $('#department-name').val('');
+                    $('#manager-id').val('');
+                },
+                error: function (xhr) {
+                    alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        });
+
+        // Редактирование отдела inline
+        $('#departments-table').on('click', '.edit-btn', function () {
+            const row = $(this).closest('tr');
+            const actions = row.find('.actions');
+            const id = row.data('id');
+
+            // Делаем ячейки редактируемыми
+            row.find('td:not(:last-child)').attr('contenteditable', true);
+
+
+            // Сохраняем исходные данные для отмены
+            const originalData = {
+                name: row.find('td:eq(1)').text(),
+                managerId: row.find('td:eq(2)').text() === 'Нет' ? null : row.find('td:eq(2)').text()
+            };
+
+            // Переключаем режим редактирования
+            actions.addClass('editing');
+
+            // Обработчик сохранения
+            actions.find('.save-btn').off('click').on('click', function () {
+                const newName = row.find('td:eq(1)').text().trim();
+                const newManagerId = row.find('td:eq(2)').text().trim() === 'Нет' ? null : row.find('td:eq(2)').text().trim();
+
+                if (!newName) {
+                    alert('Название отдела обязательно!');
+                    return;
+                }
+
+                $.ajax({
+                    url: `/api/departments/${id}`,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ name: newName, manager_id: newManagerId }),
+                    success: function (response) {
+                        alert(response.message);
+                        actions.removeClass('editing');
+                        row.find('td:not(:last-child)').attr('contenteditable', false);
+                        loadDepartments(); // Обновляем таблицу
+                    },
+                    error: function (xhr) {
+                        alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                    }
+                });
+            });
+
+            // Обработчик отмены
+            actions.find('.cancel-btn').off('click').on('click', function () {
+                actions.removeClass('editing');
+                row.find('td:eq(1)').text(originalData.name);
+                row.find('td:eq(2)').text(originalData.managerId || 'Нет');
+                row.find('td:not(:last-child)').attr('contenteditable', false);
+            });
+        });
+
+        // Удаление отдела
+        $('#departments-table').on('click', '.delete-btn', function () {
+            const row = $(this).closest('tr');
+            const id = row.data('id');
+
+            if (confirm('Вы уверены, что хотите удалить этот отдел?')) {
+                $.ajax({
+                    url: `/api/departments/${id}`,
+                    method: 'DELETE',
+                    success: function (response) {
+                        alert(response.message);
+                        loadDepartments();
+                    },
+                    error: function (xhr) {
+                        alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                    }
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>
