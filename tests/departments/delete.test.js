@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../server.js';
-import db from '../../config/db.js';
+import db from '../../../config/db.js';
 import { setupDatabase } from '../testSetup.js';
 import { loginUser, createDepartment } from '../testHelpers.js';
 

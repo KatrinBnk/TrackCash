@@ -16,22 +16,22 @@ export const setupDatabase = async () => {
     // Создаём тестового администратора
     const adminPassword = await bcrypt.hash('123456', 10);
     await db.query(
-        'INSERT INTO Users (username, password, role) VALUES (?, ?, ?)',
-        ['admin1', adminPassword, 'admin']
+        'INSERT INTO Users (username, password, role, surname, name, patronymic) VALUES (?, ?, ?, ?, ?, ?)',
+        ['admin1', adminPassword, 'admin', 'Ivanov', 'Ivan', 'Ivanovich']
     );
 
     // Тестового менеджера
     const managerPassword = await bcrypt.hash('123456', 10);
     await db.query(
-        'INSERT INTO Users (username, password, role) VALUES (?, ?, ?)',
-        ['manager1', managerPassword, 'manager']
+        'INSERT INTO Users (username, password, role, surname, name, patronymic) VALUES (?, ?, ?, ?, ?, ?)',
+        ['manager1', managerPassword, 'manager', 'Mironova', 'Irina', 'Grygorievna']
     );
 
     // Тестового сотрудника
     const employeePassword = await bcrypt.hash('123456', 10);
     await db.query(
-        'INSERT INTO Users (username, password, role) VALUES (?, ?, ?)',
-        ['employee1', employeePassword, 'employee']
+        'INSERT INTO Users (username, password, role, surname, name, patronymic) VALUES (?, ?, ?, ?, ?, ?)',
+        ['employee1', employeePassword, 'employee', 'Smirnov', 'Ivan', 'Kirilovich']
     );
 
     // Создаём категорию

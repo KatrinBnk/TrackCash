@@ -8,9 +8,16 @@ before(setupDatabase);
 
 describe('POST /api/auth', () => {
     describe('POST /api/auth/register', () => {
-        it('should allow admin to register a new user', async () => {
+        it('should allow admin to register a new user with full name', async () => {
             const adminToken = await loginUser({ username: 'admin1', password: '123456' });
-            const newUser = { username: 'newuser1', password: 'password123', role: 'employee' };
+            const newUser = {
+                username: 'newuser1',
+                password: 'password123',
+                role: 'employee',
+                surname: 'Doe',
+                name: 'John',
+                patronymic: 'Smith'
+            };
 
             const res = await request(app)
                 .post('/api/auth/register')
@@ -21,11 +28,21 @@ describe('POST /api/auth', () => {
             expect(res.body).to.have.property('message', 'User registered successfully');
             expect(res.body.user).to.have.property('username', 'newuser1');
             expect(res.body.user).to.have.property('role', 'employee');
+            expect(res.body.user).to.have.property('name', 'John');
+            expect(res.body.user).to.have.property('surname', 'Doe');
+            expect(res.body.user).to.have.property('patronymic', 'Smith');
         });
 
         it('should return 403 if non-admin tries to register a user', async () => {
             const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
-            const newUser = { username: 'newuser2', password: 'password123', role: 'employee' };
+            const newUser = {
+                username: 'newuser2',
+                password: 'password123',
+                role: 'employee',
+                name: 'Jane',
+                surname: 'Doe',
+                patronymic: 'Smith'
+            };
 
             const res = await request(app)
                 .post('/api/auth/register')
@@ -38,7 +55,14 @@ describe('POST /api/auth', () => {
 
         it('should return 400 if username already exists', async () => {
             const adminToken = await loginUser({ username: 'admin1', password: '123456' });
-            const duplicateUser = { username: 'employee1', password: 'newpassword', role: 'employee' };
+            const duplicateUser = {
+                username: 'employee1',
+                password: 'newpassword',
+                role: 'employee',
+                name: 'Existing',
+                surname: 'User',
+                patronymic: 'Test'
+            };
 
             const res = await request(app)
                 .post('/api/auth/register')
@@ -63,6 +87,7 @@ describe('POST /api/auth', () => {
             expect(res.body).to.have.property('token').that.is.a('string');
             expect(res.body.user).to.have.property('username', 'admin1');
             expect(res.body.user).to.have.property('role', 'admin');
+            // Примечание: ФИО не возвращаются в ответе login по текущему коду контроллера
         });
 
         it('should return 401 if credentials are incorrect', async () => {
@@ -88,6 +113,7 @@ describe('POST /api/auth', () => {
 
             expect(res.body).to.have.property('message', 'Logged out successfully');
         });
+
         it('should return 401 if no token is provided for logout', async () => {
             const res = await request(app)
                 .post('/api/auth/logout')

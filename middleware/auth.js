@@ -37,3 +37,12 @@ export const requireManager = (req, res, next) => {
     }
     next();
 };
+
+const checkRole = (role) => {
+    return (req, res, next) => {
+        if (req.user.role !== role) {
+            return res.status(403).json({ message: 'Недостаточно прав' });
+        }
+        next();
+    };
+};

@@ -1,14 +1,12 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../server.js';
-import db from '../../config/db.js';
+import db from '../../../config/db.js';
 import { setupDatabase } from '../testSetup.js';
-import { loginUser, createDepartment, getUserIdByUsername } from '../testHelpers.js';
+import { loginUser, createDepartment } from '../testHelpers.js';
 
 let employeeDepartmentId;
 let categoryId;
-let transactionId;
-let employeeId;
 
 before(async () => {
     await setupDatabase();
@@ -16,8 +14,10 @@ before(async () => {
     const department = await createDepartment(adminToken, { name: 'IT Department', manager_id: 2 });
     employeeDepartmentId = department.id;
 
+    // Привязываем сотрудника к отделу
     await db.query('UPDATE Users SET department_id = ? WHERE username = ?', [employeeDepartmentId, 'employee1']);
 
+    // Создаём категорию для сотрудника
     const managerToken = await loginUser({ username: 'manager1', password: '123456' });
     const categoryRes = await request(app)
         .post('/api/categories')
@@ -25,8 +25,9 @@ before(async () => {
         .send({ name: 'Travel Expenses' });
     categoryId = categoryRes.body.category.id;
 
+    // Создаём транзакцию для employee1
     const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
-    const transactionRes = await request(app)
+    await request(app)
         .post('/api/transactions')
         .set('Authorization', `Bearer ${employeeToken}`)
         .send({
@@ -36,53 +37,42 @@ before(async () => {
             date: '2025-02-23',
             comment: 'Lunch expense',
         });
-    transactionId = transactionRes.body.transaction.id;
-
-    employeeId = await getUserIdByUsername('employee1');
 });
 
-describe('PUT /api/transactions/:id', () => {
-    it('should allow employee to update their transaction', async () => {
+describe('GET /api/transactions', () => {
+    it('should allow employee to view their transactions', async () => {
         const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
-        const updatedTransaction = {
-            category_id: categoryId,
-            type: 'expense',
-            amount: 75.00,
-            date: '2025-02-24',
-            comment: 'Updated lunch expense',
-        };
 
         const res = await request(app)
-            .put(`/api/transactions/${transactionId}`)
+            .get('/api/transactions')
             .set('Authorization', `Bearer ${employeeToken}`)
-            .send(updatedTransaction)
             .expect(200);
 
-        expect(res.body).to.have.property('message', 'Transaction updated successfully');
-        expect(res.body.transaction).to.have.property('category_id', categoryId);
-        expect(res.body.transaction).to.have.property('type', 'expense');
-        expect(res.body.transaction).to.have.property('amount', "75.00");
-        expect(res.body.transaction).to.have.property('date', '2025-02-24T00:00:00.000Z');
-        expect(res.body.transaction).to.have.property('comment', 'Updated lunch expense');
-        expect(res.body.transaction).to.have.property('user_id', employeeId);
+        expect(res.body).to.be.an('array');
+        expect(res.body).to.have.lengthOf.at.least(1);
+        expect(res.body[0]).to.have.property('category_id', categoryId);
+        expect(res.body[0]).to.have.property('type', 'expense');
+        expect(res.body[0]).to.have.property('amount', 50);
+        expect(res.body[0]).to.have.property('comment', 'Lunch expense');
     });
-
-    it('should return 403 if non-employee tries to update a transaction', async () => {
+    it('should return 403 if non-employee tries to view transactions', async () => {
         const managerToken = await loginUser({ username: 'manager1', password: '123456' });
-        const updatedTransaction = {
-            amount: 100.00,
-        };
 
         const res = await request(app)
-            .put(`/api/transactions/${transactionId}`)
+            .get('/api/transactions')
             .set('Authorization', `Bearer ${managerToken}`)
-            .send(updatedTransaction)
             .expect(403);
 
         expect(res.body).to.have.property('message', 'Employee access required');
     });
+    it('should return 401 if no token provided', async () => {
+        const res = await request(app)
+            .get('/api/transactions')
+            .expect(401);
 
-    it('should return 403 if employee tries to update another employee’s transaction', async () => {
+        expect(res.body).to.have.property('message', 'Access token required');
+    });
+    it('should return empty array if employee has no transactions', async () => {
         const adminToken = await loginUser({ username: 'admin1', password: '123456' });
         await request(app)
             .post('/api/auth/register')
@@ -91,31 +81,37 @@ describe('PUT /api/transactions/:id', () => {
         await db.query('UPDATE Users SET department_id = ? WHERE username = ?', [employeeDepartmentId, 'employee2']);
 
         const employee2Token = await loginUser({ username: 'employee2', password: '123456' });
-        const updatedTransaction = {
-            amount: 60.00,
-        };
 
         const res = await request(app)
-            .put(`/api/transactions/${transactionId}`)
+            .get('/api/transactions')
             .set('Authorization', `Bearer ${employee2Token}`)
-            .send(updatedTransaction)
-            .expect(403);
+            .expect(200);
 
-        expect(res.body).to.have.property('message', 'You can only update your own transactions');
+        expect(res.body).to.be.an('array');
+        expect(res.body).to.have.lengthOf(0);
     });
-
-    it('should return 404 if transaction not found', async () => {
+    it('should filter transactions by category_id if provided', async () => {
         const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
-        const updatedTransaction = {
-            amount: 80.00,
-        };
 
         const res = await request(app)
-            .put('/api/transactions/999')
+            .get(`/api/transactions?category_id=${categoryId}`)
             .set('Authorization', `Bearer ${employeeToken}`)
-            .send(updatedTransaction)
-            .expect(404);
+            .expect(200);
 
-        expect(res.body).to.have.property('message', 'Transaction not found');
+        expect(res.body).to.be.an('array');
+        expect(res.body).to.have.lengthOf(1);
+        expect(res.body[0]).to.have.property('category_id', categoryId);
+    });
+    it('should filter transactions by date range', async () => {
+        const employeeToken = await loginUser({ username: 'employee1', password: '123456' });
+
+        const res = await request(app)
+            .get('/api/transactions?dateFrom=2025-02-23&dateTo=2025-02-23')
+            .set('Authorization', `Bearer ${employeeToken}`)
+            .expect(200);
+
+        expect(res.body).to.be.an('array');
+        expect(res.body).to.have.lengthOf(1);
+        expect(res.body[0]).to.have.property('date', '2025-02-23');
     });
 });

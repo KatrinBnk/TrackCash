@@ -5,9 +5,9 @@ import jwt from 'jsonwebtoken';
 const SALT_ROUNDS = 10;
 
 export const register = async (req, res) => {
-    const { username, password, role, department_id } = req.body;
+    const { username, password, surname, name, patronymic, role, department_id } = req.body;
 
-    if (!username || !password || !role) {
+    if (!username || !password || !surname || !name || !patronymic || !role) {
         return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -18,7 +18,15 @@ export const register = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-        const newUser = await User.create({ username, password: hashedPassword, role, department_id });
+        const newUser = await User.create({
+            username,
+            password: hashedPassword,
+            surname,
+            name,
+            patronymic,
+            role,
+            department_id
+        });
         res.status(201).json({ message: 'User registered successfully', user: newUser });
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });

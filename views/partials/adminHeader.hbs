@@ -1,0 +1,78 @@
+<header class="admin-header">
+    <nav class="admin-nav">
+        <div class="nav-brand">
+            <span onclick="window.location.href = '/admin'">CashTrack</span>
+        </div>
+        <ul class="nav-menu">
+            <li><a href="/admin/employees">Сотрудники</a></li>
+            <li><a href="/admin/departments">Отделы</a></li>
+            <li><a onclick="logout()">Выйти</a></li>
+        </ul>
+    </nav>
+</header>
+
+<script>
+    const logout = function () {
+        localStorage.clear();
+        window.location.href = '/login';
+    }
+</script>
+
+<style>
+    .admin-header {
+        background-color: #7255A5; /* Blue Violet для фона хедера */
+        padding: 20px 20px;
+        color: #F9F9F9; /* Почти белый для текста */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .admin-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1440px;
+        margin: 0 auto;
+    }
+
+    .nav-brand {
+        font-size: 24px;
+        color: #F28C38; /* Exuberant Orange для названия бренда */
+        flex: 1;
+        text-align: center;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .nav-brand:hover {
+        color: #D97A30; /* Темнее Exuberant Orange при наведении */
+    }
+
+    .nav-menu {
+        list-style: none;
+        display: flex;
+        gap: 20px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .nav-menu li a {
+        color: #F9F9F9; /* Почти белый для ссылок */
+        text-decoration: none;
+        font-size: 16px;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+        font-weight: 400;
+    }
+
+    .nav-menu li a:hover {
+        background-color: #BBFBAC; /* Светло-зелёный для фона при наведении */
+        color: #1F2526; /* Darkest Hour для текста при наведении */
+        border-radius: 5px;
+    }
+
+    .nav-menu li a:active {
+        background-color: #F7F2E8; /* Cloud Dancer при нажатии */
+        color: #7255A5; /* Blue Violet для текста при нажатии */
+    }
+</style>
