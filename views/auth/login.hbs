@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему - CashTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #F7F2E8; /* Cloud Dancer как основной фон */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background-color: #7255A5; /* Blue Violet для фона контейнера */
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            color: #F9F9F9; /* Почти белый для текста */
+        }
+
+        .login-container h2 {
+            color: #F9F9F9; /* Почти белый для заголовка */
+            font-size: 24px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .login-form input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            border: 1px solid #F28C38; /* Exuberant Orange для рамок */
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: #F7F2E8; /* Cloud Dancer для фона ввода */
+            color: #1F2526; /* Darkest Hour для текста */
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .login-form input::placeholder {
+            color: #7255A5; /* Blue Violet для placeholder */
+        }
+
+        .login-form button {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            background-color: #BBFBAC; /* Светло-зелёный для кнопки */
+            color: #1F2526; /* Darkest Hour для текста */
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .login-form button:hover {
+            background-color: #A5E698; /* Темнее светло-зелёного при наведении */
+            color: #1F2526;
+        }
+
+        .login-form button:active {
+            background-color: #9AD98F; /* Ещё темнее светло-зелёного при нажатии */
+            color: #1F2526;
+        }
+
+        .error-message {
+            color: #F28C38; /* Exuberant Orange для сообщений об ошибке */
+            font-size: 14px;
+            margin-top: 15px;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>Вход в CashTrack</h2>
+    <form class="login-form" id="login-form">
+        <input type="text" name="username" placeholder="Имя пользователя" required>
+        <input type="password" name="password" placeholder="Пароль" required>
+        <button type="submit">Войти</button>
+        <div class="error-message" id="error-message"></div>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#login-form').on('submit', function (e) {
+            e.preventDefault();
+
+            const username = $('input[name="username"]').val();
+            const password = $('input[name="password"]').val();
+
+            $.ajax({
+                url: '/api/auth/login',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ username, password }),
+                success: function (response) {
+                    localStorage.setItem('token', response.token);
+                    window.location.href = `/${response.user.role}`
+                },
+                error: function (xhr) {
+                    const errorMsg = xhr.responseJSON?.message || 'Ошибка входа';
+                    $('#error-message').text(errorMsg).show();
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
