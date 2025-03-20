@@ -4,15 +4,20 @@ import { authenticateToken, requireEmployee, requireManager } from '../middlewar
 
 const router = express.Router();
 
-router.post('/', authenticateToken, (req, res, next) => {
-    if (req.body.type === 'income') {
-        requireManager(req, res, next);
+// Кастомный middleware для проверки роли в зависимости от типа транзакции
+const requireRoleForCreate = (req, res, next) => {
+    const { type } = req.body;
+    if (type === 'balance') {
+        return requireManager(req, res, next);
+    } else if (type === 'income' || type === 'expense') {
+        return requireEmployee(req, res, next);
     } else {
-        requireEmployee(req, res, next);
+        return res.status(400).json({ message: 'Недопустимый тип транзакции. Используйте "income", "expense" или "balance"' });
     }
-}, transactionController.addTransaction);
-router.get('/', authenticateToken, requireEmployee, transactionController.getTransactions);
-router.put('/:id', authenticateToken, requireEmployee, transactionController.updateTransaction);
+};
+
+router.post('/', authenticateToken, requireRoleForCreate, transactionController.addTransaction);
+router.put('/:id', authenticateToken, requireRoleForUpdate, transactionController.updateTransaction);
 router.delete('/:id', authenticateToken, requireEmployee, transactionController.deleteTransaction);
 
 export default router;
