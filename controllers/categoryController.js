@@ -1,131 +1,116 @@
 import Category from '../models/category.js';
-import db from '../config/db.js';
 
-const getManagerDepartmentId = async (managerId) => {
-    const [department] = await db.query('SELECT * FROM Departments WHERE manager_id = ?', [managerId]);
-    if (!department.length) {
-        throw { status: 400, message: 'Manager is not assigned to a department' };
-    }
-    return department[0].id;
-};
-
-const checkCategoryOwnership = async (id, departmentId) => {
-    const [category] = await db.query('SELECT * FROM Categories WHERE id = ?', [id]);
-    if (!category.length) {
-        throw { status: 404, message: 'Category not found' };
-    }
-    if (category[0].department_id !== departmentId) {
-        throw { status: 403, message: 'Category does not belong to your department' };
-    }
-    return category[0];
-};
-
-const handleError = (res, err, action) => {
-    if (err.status) {
-        return res.status(err.status).json({ message: err.message });
-    }
-    console.error(`Error ${action} category:`, err);
-    return res.status(500).json({ message: 'Server error', error: err.message });
-};
-
+/**
+ * Создаёт новую категорию в отделе менеджера.
+ *
+ * @async
+ * @function createCategory
+ * @param {Object} req - Объект запроса Express.
+ * @param {Object} req.user - Данные пользователя из JWT-токена.
+ * @param {string} req.user.id - ID менеджера, создающего категорию.
+ * @param {Object} req.body - Тело запроса с данными категории.
+ * @param {string} req.body.name - Название новой категории.
+ * @param {Object} res - Объект ответа Express.
+ * @returns {Promise<void>} - Отправляет созданную категорию или сообщение об ошибке через HTTP-ответ.
+ */
 export const createCategory = async (req, res) => {
-    const { name } = req.body;
     const managerId = req.user.id;
+    const { name } = req.body;
 
     if (!name) {
-        return res.status(400).json({ message: 'Category name is required' });
+        return res.status(400).json({ message: 'Имя категории обязательно' });
     }
 
     try {
-        const departmentId = await getManagerDepartmentId(managerId);
-
-        const [existingCategory] = await db.query(
-            'SELECT * FROM Categories WHERE name = ? AND department_id = ?',
-            [name, departmentId]
-        );
-        if (existingCategory.length) {
-            return res.status(400).json({ message: 'Category name already exists in your department' });
-        }
-
-        const category = await Category.create({ name, departmentId });
-        res.status(201).json({ message: 'Category created successfully', category });
+        const category = await Category.create(managerId, { name });
+        res.status(201).json({ message: 'Категория успешно создана', category });
     } catch (err) {
-        handleError(res, err, 'creating');
+        res.status(err.status || 500).json({ message: err.message });
     }
 };
 
+/**
+ * Получает список категорий для отдела пользователя с опциональной фильтрацией по имени.
+ *
+ * @async
+ * @function getCategories
+ * @param {Object} req - Объект запроса Express.
+ * @param {Object} req.user - Данные пользователя из JWT-токена.
+ * @param {string} req.user.id - ID пользователя.
+ * @param {Object} req.query - Параметры запроса из строки URL.
+ * @param {string} [req.query.name] - Необязательное имя категории для фильтрации.
+ * @param {Object} res - Объект ответа Express.
+ * @returns {Promise<void>} - Отправляет список категорий или сообщение об ошибке через HTTP-ответ.
+ */
 export const getCategories = async (req, res) => {
     const userId = req.user.id;
-    const userRole = req.user.role;
-    const nameFilter = req.query.name;
+    const categoryName = req.query.name;
 
     try {
-        if (userRole !== 'manager' && userRole !== 'employee') {
-            return res.status(403).json({ message: 'Access restricted to managers and employees' });
-        }
-
-        let departmentId;
-        if (userRole === 'manager') {
-            departmentId = await getManagerDepartmentId(userId);
-        } else if (userRole === 'employee') {
-            const [user] = await db.query('SELECT department_id FROM Users WHERE id = ?', [userId]);
-            if (!user.length || !user[0].department_id) {
-                return res.status(400).json({ message: 'Employee is not assigned to a department' });
-            }
-            departmentId = user[0].department_id;
-        }
-
-        const categories = await Category.getByDepartmentId(departmentId, nameFilter);
+        const categories = await Category.getCategories(userId, categoryName);
         res.status(200).json(categories);
     } catch (err) {
-        handleError(res, err, 'fetching');
+        res.status(err.status || 500).json({ message: err.message });
     }
 };
 
+/**
+ * Обновляет категорию по её ID, если менеджер имеет права.
+ *
+ * @async
+ * @function updateCategory
+ * @param {Object} req - Объект запроса Express.
+ * @param {Object} req.user - Данные пользователя из JWT-токена.
+ * @param {string} req.user.id - ID менеджера, выполняющего обновление.
+ * @param {Object} req.params - Параметры из URL.
+ * @param {string} req.params.id - ID категории для обновления.
+ * @param {Object} req.body - Тело запроса с данными категории.
+ * @param {string} req.body.name - Новое название категории.
+ * @param {Object} res - Объект ответа Express.
+ * @returns {Promise<void>} - Отправляет обновлённую категорию или сообщение об ошибке через HTTP-ответ.
+ */
 export const updateCategory = async (req, res) => {
     const { id } = req.params;
     const { name } = req.body;
     const managerId = req.user.id;
 
     if (!name) {
-        return res.status(400).json({ message: 'Category name is required' });
+        return res.status(400).json({ message: 'Наименование категории обязательно' });
     }
 
     try {
-        const departmentId = await getManagerDepartmentId(managerId);
-        await checkCategoryOwnership(id, departmentId);
-
-        const [existingCategory] = await db.query(
-            'SELECT * FROM Categories WHERE name = ? AND department_id = ? AND id != ?',
-            [name, departmentId, id]
-        );
-        if (existingCategory.length) {
-            return res.status(400).json({ message: 'Category name already exists in your department' });
-        }
-
-        const updatedCategory = await Category.update(id, { name });
-        res.status(200).json({ message: 'Category updated successfully', category: updatedCategory });
+        const updatedCategory = await Category.update(managerId, { name, categoryId: id });
+        res.status(200).json({ message: 'Категория успешно обновлена', category: updatedCategory });
     } catch (err) {
-        handleError(res, err, 'updating');
+        res.status(err.status || 500).json({ message: err.message });
     }
 };
 
+/**
+ * Удаляет категорию по её ID, если менеджер имеет на это права.
+ *
+ * @async
+ * @function deleteCategory
+ * @param {Object} req - Объект запроса Express.
+ * @param {Object} req.user - Данные пользователя из JWT-токена.
+ * @param {string} req.user.id - ID менеджера, выполняющего удаление.
+ * @param {Object} req.params - Параметры из URL.
+ * @param {string} req.params.categoryId - ID категории для удаления.
+ * @param {Object} res - Объект ответа Express.
+ * @returns {Promise<void>} - Отправляет HTTP-ответ с кодом 204 при успехе или ошибку.
+ */
 export const deleteCategory = async (req, res) => {
-    const { id } = req.params;
     const managerId = req.user.id;
+    const { categoryId } = req.params;
+
+    if (!categoryId) {
+        return res.status(400).json({ message: 'ID категории обязателен' });
+    }
 
     try {
-        const departmentId = await getManagerDepartmentId(managerId);
-        await checkCategoryOwnership(id, departmentId);
-
-        const [transactions] = await db.query('SELECT * FROM Transactions WHERE category_id = ?', [id]);
-        if (transactions.length > 0) {
-            return res.status(400).json({ message: 'Cannot delete category used in transactions' });
-        }
-
-        await Category.delete(id);
-        res.status(200).json({ message: 'Category deleted successfully' });
+        await Category.delete(managerId, categoryId);
+        res.status(204).send();
     } catch (err) {
-        handleError(res, err, 'deleting');
+        res.status(err.status || 500).json({ message: err.message });
     }
 };
