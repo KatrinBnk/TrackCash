@@ -9,8 +9,7 @@ export const authenticateToken = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
         next();
     } catch (err) {
         return res.status(403).json({ message: 'Invalid or expired token' });
@@ -38,11 +37,23 @@ export const requireManager = (req, res, next) => {
     next();
 };
 
-const checkRole = (role) => {
+export const checkRole = (requiredRole) => {
     return (req, res, next) => {
-        if (req.user.role !== role) {
-            return res.status(403).json({ message: 'Недостаточно прав' });
+        const token = req.cookies.token;
+
+        if (!token) {
+            return res.redirect('/login');
         }
-        next();
+
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            if (decoded.role !== requiredRole) {
+                return res.redirect(`/${decoded.role}`);
+            }
+            req.user = decoded;
+            next();
+        } catch (error) {
+            return res.clearCookie('token').redirect('/login');
+        }
     };
 };
