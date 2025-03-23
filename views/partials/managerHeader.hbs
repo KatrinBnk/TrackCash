@@ -1,16 +1,16 @@
-<header class="admin-header">
-    <nav class="admin-nav">
+<header class="manager-header">
+    <nav class="manager-nav">
         <div class="nav-brand">
-            <span onclick="window.location.href = '/admin'">CashTrack</span>
+            <span onclick="window.location.href = '/manager'">CashTrack</span>
         </div>
         <ul class="nav-menu">
-            <li><a href="/admin/employees">Сотрудники</a></li>
-            <li><a href="/admin/departments">Отделы</a></li>
+            <li><a href="/manager/balance">Выплаты</a></li>
+            <li><a href="/manager/statistics">Статистика</a></li>
+            <li><a href="/manager/categories">Категории расходов</a></li>
             <li><a onclick="logout()">Выйти</a></li>
         </ul>
     </nav>
 </header>
-
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -22,7 +22,7 @@
             url: '/api/auth/logout',
             method: 'POST',
             success: function (response) {
-               window.location.href = '/login';
+                window.location.href = '/login';
             },
             error: function (xhr) {
                 console.error('Ошибка при выходе:', xhr.responseJSON?.message || 'Неизвестная ошибка');
@@ -32,14 +32,14 @@
 </script>
 
 <style>
-    .admin-header {
-        background-color: #7255A5; /* Blue Violet для фона хедера */
+    .manager-header {
+        background-color: #7255A5;
         padding: 20px 20px;
-        color: #F9F9F9; /* Почти белый для текста */
+        color: #F9F9F9;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
-    .admin-nav {
+    .manager-nav {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -49,7 +49,7 @@
 
     .nav-brand {
         font-size: 24px;
-        color: #F28C38; /* Exuberant Orange для названия бренда */
+        color: #F28C38;
         flex: 1;
         text-align: center;
         font-weight: 600;
@@ -58,7 +58,7 @@
     }
 
     .nav-brand:hover {
-        color: #D97A30; /* Темнее Exuberant Orange при наведении */
+        color: #D97A30;
     }
 
     .nav-menu {
@@ -70,7 +70,7 @@
     }
 
     .nav-menu li a {
-        color: #F9F9F9; /* Почти белый для ссылок */
+        color: #F9F9F9;
         text-decoration: none;
         font-size: 16px;
         padding: 10px 15px;
@@ -79,13 +79,13 @@
     }
 
     .nav-menu li a:hover {
-        background-color: #BBFBAC; /* Светло-зелёный для фона при наведении */
-        color: #1F2526; /* Darkest Hour для текста при наведении */
+        background-color: #BBFBAC;
+        color: #1F2526;
         border-radius: 5px;
     }
 
     .nav-menu li a:active {
-        background-color: #F7F2E8; /* Cloud Dancer при нажатии */
-        color: #7255A5; /* Blue Violet для текста при нажатии */
+        background-color: #F7F2E8;
+        color: #7255A5;
     }
 </style>
