@@ -46,7 +46,7 @@ export const register = async (req, res) => {
         });
         res.status(201).json({ message: 'Пользователь успешно зарегистрирован', user: newUser });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(err.status || 500).json({ message: err.message });
     }
 };
 
@@ -91,7 +91,7 @@ export const login = async (req, res) => {
             user: { id: user.id, username: user.username, role: user.role },
         });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(err.status || 500).json({ message: err.message });
     }
 };
 
@@ -109,6 +109,6 @@ export const logout = async (req, res) => {
         res.clearCookie('token');
         res.status(200).json({ message: 'Выход из системы выполнен успешно' });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(err.status || 500).json({ message: err.message });
     }
 };

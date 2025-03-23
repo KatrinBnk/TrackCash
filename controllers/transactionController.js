@@ -34,7 +34,6 @@ export const addTransaction = async (req, res) => {
         });
         res.status(201).json({ message: 'Транзакция успешно добавлена', transaction });
     } catch (err) {
-        console.error('Ошибка при добавлении транзакции:', err);
         res.status(err.status || 500).json({ message: err.message });
     }
 };
@@ -74,7 +73,6 @@ export const updateTransaction = async (req, res) => {
         });
         res.status(200).json({ message: 'Транзакция успешно обновлена', transaction: updatedTransaction });
     } catch (err) {
-        console.error('Ошибка при обновлении транзакции:', err);
         res.status(err.status || 500).json({ message: err.message });
     }
 };
@@ -103,7 +101,6 @@ export const deleteTransaction = async (req, res) => {
         }
         res.status(204).send();
     } catch (err) {
-        console.error('Ошибка при удалении транзакции:', err);
         res.status(err.status || 500).json({ message: err.message });
     }
 };

@@ -14,7 +14,7 @@ export const getAllUsers = async (req, res) => {
         const users = await User.findAll();
         res.status(200).json(users);
     } catch (err) {
-        res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+        res.status(err.status || 500).json({ message: 'Ошибка сервера', error: err.message });
     }
 };
 
@@ -38,7 +38,7 @@ export const getUserById = async (req, res) => {
         }
         res.status(200).json(user);
     } catch (err) {
-        res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+        res.status(err.status || 500).json({ message: 'Ошибка сервера', error: err.message });
     }
 };
 
@@ -62,7 +62,7 @@ export const getMe = async (req, res) => {
         }
         res.status(200).json(user);
     } catch (err) {
-        res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+        res.status(err.status || 500).json({ message: 'Ошибка сервера', error: err.message });
     }
 };
 
@@ -84,7 +84,7 @@ export const getUsersByDepartmentId = async (req, res) => {
         console.log(users);
         res.status(200).json(users);
     } catch (err) {
-        res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+        res.status(err.status || 500).json({ message: 'Ошибка сервера', error: err.message });
     }
 };
 
@@ -119,7 +119,7 @@ export const updateUser = async (req, res) => {
         });
         res.status(200).json({ message: 'Пользователь успешно обновлен', user: updatedUser });
     } catch (err) {
-        res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+        res.status(err.status || 500).json({ message: 'Ошибка сервера', error: err.message });
     }
 };
 
@@ -144,6 +144,6 @@ export const deleteUser = async (req, res) => {
         }
         res.status(200).json({ message: 'Пользователь успешно удален' });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(err.status || 500).json({ message: err.message });
     }
 };
