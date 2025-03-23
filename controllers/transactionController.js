@@ -61,11 +61,11 @@ export const addTransaction = async (req, res) => {
 export const updateTransaction = async (req, res) => {
     const creatorId = req.user.id;
     const { id } = req.params;
-    const { category_id, type, amount, date, comment } = req.body;
+    const { categoryId, type, amount, date, comment } = req.body;
 
     try {
         const updatedTransaction = await Transaction.update(id, {
-            category_id,
+            category_id: categoryId,
             type,
             amount,
             date,
