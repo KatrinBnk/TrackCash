@@ -36,7 +36,14 @@ class Department {
             'INSERT INTO Departments (name, manager_id) VALUES (?, ?)',
             [name, manager_id || null]
         );
-        return { id: result.insertId, name, manager_id };
+
+        const departmentId = result.insertId;
+
+        if (manager_id) {
+            await db.query('UPDATE Users SET department_id = ? WHERE id = ?', [departmentId, manager_id]);
+        }
+
+        return { id: departmentId, name, manager_id };
     }
 
     /**
