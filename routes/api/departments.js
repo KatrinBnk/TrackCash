@@ -1,6 +1,6 @@
 import express from 'express';
-import * as departmentController from '../controllers/departmentController.js';
-import { authenticateToken, requireAdmin } from '../middleware/auth.js';
+import * as departmentController from '../../controllers/departmentController.js';
+import { authenticateToken, requireAdmin } from '../../middleware/auth.js';
 
 const router = express.Router();
 
