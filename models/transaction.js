@@ -1,4 +1,5 @@
 import db from '../config/db.js';
+import {convertNodesIntoNode} from "jsdom/lib/jsdom/living/node.js";
 
 class Transaction {
     /**
@@ -127,6 +128,8 @@ class Transaction {
                 throw { status: 403, message: 'Только сам сотрудник может обновлять свои транзакции доходов и расходов' };
             }
 
+            console.log(category_id)
+
             if (category_id !== undefined && category_id) {
                 const [categoryRows] = await db.query('SELECT * FROM Categories WHERE id = ?', [category_id]);
                 const category = categoryRows[0];
@@ -161,9 +164,14 @@ class Transaction {
                 values.push(comment || null);
             }
 
+
             if (updates.length === 0) {
                 throw { status: 400, message: 'Не указано ни одно поле для обновления' };
             }
+
+            console.warn(updates)
+            console.warn(values)
+
 
             values.push(id);
             await db.query(`UPDATE Transactions SET ${updates.join(', ')} WHERE id = ?`, values);
