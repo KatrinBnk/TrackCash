@@ -1,63 +1,100 @@
 import db from '../config/db.js';
 
 class User {
+    /**
+     * Находит пользователя по имени пользователя.
+     *
+     * @async
+     * @function findByUsername
+     * @param {string} username - Имя пользователя для поиска.
+     * @returns {Promise<Object|null>} - Возвращает объект пользователя или null, если пользователь не найден.
+     */
     static async findByUsername(username) {
         const [rows] = await db.query('SELECT * FROM Users WHERE username = ?', [username]);
         return rows[0];
     }
 
+    /**
+     * Находит пользователя по его ID.
+     *
+     * @async
+     * @function findById
+     * @param {string} id - ID пользователя для поиска.
+     * @returns {Promise<Object|null>} - Возвращает объект пользователя или null, если пользователь не найден.
+     */
     static async findById(id) {
         const [rows] = await db.query('SELECT * FROM Users WHERE id = ?', [id]);
         return rows[0];
     }
 
+    /**
+     * Получает список всех пользователей.
+     *
+     * @async
+     * @function findAll
+     * @returns {Promise<Object[]>} - Возвращает массив объектов пользователей.
+     */
     static async findAll() {
         const [rows] = await db.query('SELECT * FROM Users');
         return rows;
     }
 
-    static async findByAll({params}) {
-        const { username, role, department_id } = params;
-        if (!username && !role && !department_id) return this.findAll();
-
-        let query = 'SELECT * FROM Users';
-        const values = [];
-        if (username) {
-            query += ' WHERE username = ?';
-            values.push(username);
-        }
-        if (role) {
-            query += (username ? ' AND' : ' WHERE') + ' role = ?';
-            values.push(role);
-        }
-        if (department_id) {
-            query += (username || role ? ' AND' : ' WHERE') + ' department_id = ?';
-            values.push(department_id);
-        }
-        const [rows] = await db.query(query, values);
+    /**
+     * Получает список пользователей по ID отдела с ролью "employee".
+     *
+     * @async
+     * @function getUserByDepartmentId
+     * @param {string} department_id - ID отдела для поиска пользователей.
+     * @returns {Promise<Object[]>} - Возвращает массив объектов пользователей.
+     */
+    static async getUserByDepartmentId(department_id) {
+        const [rows] = await db.query('SELECT * FROM Users WHERE department_id = ? AND role = "employee"', [department_id]);
         return rows;
     }
 
+    /**
+     * Удаляет пользователя по его ID с проверкой на привязку к отделу.
+     *
+     * @async
+     * @function delete
+     * @param {string} id - ID пользователя для удаления.
+     * @returns {Promise<boolean>} - Возвращает true, если пользователь удален, иначе выбрасывает ошибку.
+     * @throws {Object} - Ошибка с кодом статуса и сообщением, если пользователь не найден или является менеджером отдела.
+     */
     static async delete(id) {
         const [user] = await db.query('SELECT * FROM Users WHERE id = ?', [id]);
-        if (!user) {
-            throw { status: 404, message: 'User not found' };
+        if (!user.length) {
+            throw { status: 404, message: 'Пользователь не найден' };
         }
         if (user[0].role === 'manager' && user[0].department_id) {
-            throw { status: 400, message: 'Менеджер привязан к отделу' + user[0].department_id + ' его удаление невозможно'};
+            throw { status: 400, message: `Менеджер привязан к отделу ${user[0].department_id}, его удаление невозможно` };
         }
 
         const [result] = await db.query('DELETE FROM Users WHERE id = ?', [id]);
         return result.affectedRows > 0;
     }
 
+    /**
+     * Обновляет данные пользователя по его ID с учетом логики привязки к отделам.
+     *
+     * @async
+     * @function update
+     * @param {string} id - ID пользователя для обновления.
+     * @param {Object} [data] - Объект с данными для обновления.
+     * @param {string} [data.surname] - Новая фамилия пользователя (опционально).
+     * @param {string} [data.name] - Новое имя пользователя (опционально).
+     * @param {string} [data.patronymic] - Новое отчество пользователя (опционально).
+     * @param {string} [data.department_id] - Новый ID отдела пользователя (опционально, может быть null).
+     * @returns {Promise<Object|null>} - Возвращает обновленного пользователя или null, если ничего не обновлено.
+     * @throws {Object} - Ошибка с кодом статуса и сообщением, если пользователь или отдел не найдены, или есть конфликт менеджеров.
+     */
     static async update(id, { surname, name, patronymic, department_id } = {}) {
         const updates = [];
         const values = [];
 
         // Проверка существования пользователя
         if (await this.findById(id) === null) {
-            throw { status: 404, message: 'User not found' };
+            throw { status: 404, message: 'Пользователь не найден' };
         }
 
         // Обновление базовых полей
@@ -81,7 +118,6 @@ class User {
             if (department_id === null) {
                 // Установка отдела в null
                 if (user[0].role === 'manager' && user[0].department_id) {
-                    // Очистка manager_id в текущем отделе
                     await db.query(
                         'UPDATE Departments SET manager_id = NULL WHERE id = ? AND manager_id = ?',
                         [user[0].department_id, id]
@@ -92,7 +128,7 @@ class User {
                 // Проверка существования отдела
                 const [department] = await db.query('SELECT * FROM Departments WHERE id = ?', [department_id]);
                 if (!department.length) {
-                    throw { status: 400, message: 'Отдела с таким идентификатором не существует.' };
+                    throw { status: 400, message: 'Отдела с таким идентификатором не существует' };
                 }
 
                 if (user[0].role === 'manager') {
@@ -139,6 +175,21 @@ class User {
         return updated[0];
     }
 
+    /**
+     * Создает нового пользователя в базе данных.
+     *
+     * @async
+     * @function create
+     * @param {Object} data - Объект с данными нового пользователя.
+     * @param {string} data.username - Уникальное имя пользователя.
+     * @param {string} data.password - Хэшированный пароль пользователя.
+     * @param {string} data.surname - Фамилия пользователя.
+     * @param {string} data.name - Имя пользователя.
+     * @param {string} data.patronymic - Отчество пользователя.
+     * @param {string} data.role - Роль пользователя (например, 'admin', 'manager', 'employee').
+     * @param {string} [data.department_id] - ID отдела пользователя (опционально).
+     * @returns {Promise<Object>} - Возвращает созданного пользователя с его ID и основными данными.
+     */
     static async create({ username, password, surname, name, patronymic, role, department_id }) {
         const [result] = await db.query(
             'INSERT INTO Users (username, password, surname, name, patronymic, role, department_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
