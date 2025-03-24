@@ -3,13 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Панель менеджера - CashTrack</title>
+    <title>Панель администратора - CashTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; font-family: Arial, sans-serif; background-color: #f4f4f4; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .welcome-message { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); text-align: center; margin-top: 20px; }
-        .welcome-message h1 { color: #333; font-size: 28px; margin-bottom: 10px; }
-        .welcome-message p { color: #666; font-size: 16px; }
+        body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #F7F2E8;
+            color: #1F2526;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .welcome-message {
+            background-color: #7255A5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            color: #F9F9F9;
+        }
+
+        .welcome-message h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            font-size: 16px;
+        }
+
+        .info-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #F28C38;
+            margin-bottom: 20px;
+        }
+
+        .info-section h2 {
+            text-align: center;
+            color: #7255A5;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .info-section div {
+            margin-bottom: 20px;
+        }
+
+        .info-section a {
+            font-size: 20px;
+            font-weight: 500;
+            color: #7255A5;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-section a:hover {
+            color: #8255B9;
+        }
+
+        .info-section p {
+            font-size: 16px;
+            margin: 0;
+            color: #1F2526;
+        }
     </style>
 </head>
 <body>
@@ -17,8 +85,28 @@
 <div class="container">
     <div id="content">
         <div class="welcome-message">
-            <h1>Добро пожаловать!</h1>
-            <p>Здесь вы можете управлять сотрудниками и отделами системы CashTrack.</p>
+            <h1>Добро пожаловать, администратор!</h1>
+            <p>Ваш инструмент для управления финансами компании</p>
+        </div>
+
+        <div class="info-section">
+            <h2>Что вы можете делать?</h2>
+            <div>
+                <a href="/admin/employees">Управлять сотрудниками </a>
+                <p>
+                    Система предоставляет удобный инструмент для управления сотрудниками, которые имеют доступ к системе.
+                    Вы можете регистрировать новых работников, обновлять информацию и удалять уже зарегистрированных в системе работников.
+                </p>
+            </div>
+
+            <div>
+                <a href="/admin/departments">Управлять отделами</a>
+                <p>
+                    Являясь администратором системы на вас лежит ответственность за управление всеми отделами компании.
+                    Поэтому для вашего удобства и автоматизации процессов был создан удобный инструмент для создания, управления и удаления отделов.
+                </p>
+            </div>
+
         </div>
     </div>
 </div>
