@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление зарплатами - CashTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #F7F2E8;
+            color: #1F2526;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .welcome-message {
+            background-color: #7255A5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            color: #F9F9F9;
+        }
+
+        .welcome-message h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #F28C38;
+            border-radius: 4px;
+            background-color: #fff;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+        }
+
+        .search-bar input::placeholder {
+            color: #7255A5;
+        }
+
+        .employees-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .employees-table th, .employees-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #7255A5;
+        }
+
+        .employees-table th {
+            background-color: #7255A5;
+            color: #F9F9F9;
+            font-weight: 600;
+        }
+
+        .employees-table td {
+            color: #1F2526;
+            font-weight: 400;
+        }
+
+        .payout-btn {
+            padding: 8px 16px;
+            background-color: #BBFBAC;
+            color: #1F2526;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .payout-btn:hover {
+            background-color: #A5E698;
+        }
+
+        .payout-details {
+            display: none;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #F28C38;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+        }
+
+        .payout-details.active {
+            display: block;
+        }
+
+        .transaction-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .transaction-form h3 {
+            margin: 0 0 10px 0;
+            width: 100%;
+        }
+
+        .transaction-form input {
+            padding: 10px;
+            border: 1px solid #7255A5;
+            border-radius: 4px;
+            background-color: #F7F2E8;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            width: 200px;
+        }
+
+        .transaction-form input::placeholder {
+            color: #7255A5;
+        }
+
+        .transaction-form button {
+            padding: 10px 20px;
+            background-color: #BBFBAC;
+            color: #1F2526;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .transaction-form button:hover {
+            background-color: #A5E698;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+
+        .history-table th, .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #7255A5;
+        }
+
+        .history-table th {
+            background-color: #7255A5;
+            color: #F9F9F9;
+            font-weight: 600;
+        }
+
+        .history-table td {
+            color: #1F2526;
+            font-weight: 400;
+        }
+
+        .no-transactions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #F28C38;
+            border-radius: 4px;
+            text-align: center;
+            color: #1F2526;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+{{> managerHeader}}
+<div class="container">
+    <div class="welcome-message">
+        <h1>Управление зарплатами сотрудников</h1>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" id="search-employee" placeholder="Поиск по ФИО">
+    </div>
+
+    <table class="employees-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>ФИО</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody id="employees-body"></tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        $.ajaxSetup({
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+        });
+
+        let departmentId = null;
+        let allEmployees = [];
+
+        $.ajax({
+            url: '/api/users/me',
+            method: 'GET',
+            success: function (user) {
+                departmentId = user.department_id;
+                loadEmployees();
+            },
+            error: function () {
+                alert('Ошибка получения данных пользователя');
+            }
+        });
+
+        function loadEmployees() {
+            $.ajax({
+                url: `/api/users/department/${departmentId}`,
+                method: 'GET',
+                success: function (employees) {
+                    allEmployees = employees;
+                    renderEmployees(allEmployees);
+                },
+                error: function (xhr) {
+                    alert('Ошибка загрузки сотрудников: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        }
+
+        function renderEmployees(employees) {
+            const tbody = $('#employees-body');
+            tbody.empty();
+            employees.forEach(employee => {
+                const fullName = `${employee.surname || ''} ${employee.name || ''} ${employee.patronymic || ''}`.trim();
+                const row = `
+                    <tr data-id="${employee.id}">
+                        <td>${employee.id}</td>
+                        <td>${fullName}</td>
+                        <td>
+                            <button class="payout-btn">Выплаты</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+        }
+
+        function loadHistory(userId, detailsContainer) {
+            $.ajax({
+                url: `/api/statistics/detailed?userIds=${userId}&transactionTypes=balance`,
+                method: 'GET',
+                success: function (transactionsData) {
+                    const historyContainer = detailsContainer.find('.history-container');
+                    historyContainer.empty();
+                    const transactions = transactionsData.transactions;
+
+                    if (transactions && Array.isArray(transactions) && transactions.length > 0) {
+
+                        const table = `
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Дата</th>
+                                        <th>Сумма</th>
+                                        <th>Комментарий</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${transactions.map(tx => `
+                                        <tr>
+                                            <td>${new Date(tx.date).toLocaleDateString()}</td>
+                                            <td>${tx.amount}</td>
+                                            <td>${tx.comment || '-'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                        historyContainer.append(table);
+                    } else {
+                        historyContainer.append('<div class="no-transactions">За пользователем еще не числится ни одной выплаты</div>');
+                    }
+                },
+                error: function (xhr) {
+                    alert('Ошибка загрузки истории: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        }
+
+        $('#search-employee').on('input', function () {
+            const searchQuery = $(this).val().toLowerCase().trim();
+            const filteredEmployees = allEmployees.filter(employee => {
+                const fullName = `${employee.surname || ''} ${employee.name || ''} ${employee.patronymic || ''}`.toLowerCase().trim();
+                return fullName.includes(searchQuery);
+            });
+            renderEmployees(filteredEmployees);
+        });
+
+        $('#employees-body').on('click', '.payout-btn', function () {
+            const row = $(this).closest('tr');
+            const userId = row.data('id');
+            const fullName = row.find('td:eq(1)').text();
+            const existingDetails = row.next('.payout-details-row');
+
+            if (existingDetails.length) {
+                existingDetails.remove();
+                return;
+            }
+
+            $('.payout-details-row').remove();
+
+            const detailsRow = `
+                <tr class="payout-details-row">
+                    <td colspan="3">
+                        <div class="payout-details active" id="payout-${userId}">
+                            <div class="transaction-form">
+                                <h3>Добавить выплату для ${fullName}</h3>
+                                <input type="hidden" class="transaction-user-id" value="${userId}">
+                                <input type="number" class="transaction-amount" placeholder="Сумма (руб.)" required min="0" step="0.01">
+                                <input type="date" class="transaction-date" required>
+                                <input type="text" class="transaction-comment" placeholder="Комментарий" maxlength="100">
+                                <button class="submit-transaction">Добавить выплату</button>
+                            </div>
+                            <div class="history-container"></div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            row.after(detailsRow);
+
+            const detailsContainer = $(`#payout-${userId}`);
+            loadHistory(userId, detailsContainer);
+        });
+
+        $('#employees-body').on('click', '.submit-transaction', function () {
+            const details = $(this).closest('.payout-details');
+            const userId = details.find('.transaction-user-id').val();
+            const amount = parseFloat(details.find('.transaction-amount').val());
+            const date = details.find('.transaction-date').val();
+            const comment = details.find('.transaction-comment').val();
+
+            if (!amount || amount <= 0 || !date) {
+                alert('Укажите корректную сумму и дату!');
+                return;
+            }
+
+            const transactionData = {
+                userId,
+                type: 'balance',
+                amount,
+                date,
+                comment: comment || undefined
+            };
+
+            $.ajax({
+                url: '/api/transactions',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(transactionData),
+                success: function (response) {
+                    alert(response.message);
+                    loadHistory(userId, details);
+                    details.find('.transaction-amount').val('');
+                    details.find('.transaction-date').val('');
+                    details.find('.transaction-comment').val('');
+                },
+                error: function (xhr) {
+                    alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
