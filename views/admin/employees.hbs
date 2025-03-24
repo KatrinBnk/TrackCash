@@ -427,7 +427,7 @@
             };
 
 
-            row.find('td:not(:last-child):not(:eq(5))').attr('contenteditable', true);
+            row.find('td:not(:last-child):not(:eq(5)):not(:first-child)').attr('contenteditable', true);
 
             actions.addClass('editing');
 
@@ -440,7 +440,7 @@
                     department_id: row.find('td:eq(6)').text().trim() ? parseInt(row.find('td:eq(6)').text().trim()) : null
                 };
 
-                if (!updatedData.username || !updatedData.surname || !updatedData.name || !updatedData.role) {
+                if (!updatedData.username || !updatedData.surname || !updatedData.name) {
                     alert('Логин, фамилия, имя и роль обязательны!');
                     return;
                 }
