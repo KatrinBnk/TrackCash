@@ -1,0 +1,201 @@
+.stats-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    border: 1px solid #F28C38;
+}
+
+.stats-section h2 {
+    color: #7255A5;
+    margin-bottom: 15px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+}
+
+.transactions-table th:nth-child(1),
+.transactions-table td:nth-child(1) {
+    width: 50px; /* ID */
+}
+
+.transactions-table th:nth-child(2),
+.transactions-table td:nth-child(2) {
+    width: 100px; /* Дата */
+}
+
+.transactions-table th:nth-child(3),
+.transactions-table td:nth-child(3) {
+    width: 100px; /* Тип */
+}
+
+.transactions-table th:nth-child(4),
+.transactions-table td:nth-child(4) {
+    width: 100px; /* Сумма */
+}
+
+.transactions-table th:nth-child(5),
+.transactions-table td:nth-child(5) {
+    width: 150px; /* Категория */
+}
+
+.transactions-table th:nth-child(6),
+.transactions-table td:nth-child(6) {
+    width: auto; /* Комментарий */
+}
+
+/* Колонки для страницы менеджера */
+.transactions-table th:nth-child(7),
+.transactions-table td:nth-child(7) {
+    width: 100px; /* ID пользователя */
+}
+
+.transactions-table th:nth-child(8),
+.transactions-table td:nth-child(8) {
+    width: 120px; /* Фамилия */
+}
+
+.transactions-table th:nth-child(9),
+.transactions-table td:nth-child(9) {
+    width: 120px; /* Имя */
+}
+
+.transactions-table th:nth-child(10),
+.transactions-table td:nth-child(10) {
+    width: 120px; /* Отчество */
+}
+
+.transactions-table th:nth-child(11),
+.transactions-table td:nth-child(11) {
+    width: 60px; /* Действия */
+}
+
+.transactions-table th, .transactions-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #7255A5;
+    vertical-align: middle;
+}
+
+.transactions-table th {
+    background-color: #7255A5;
+    color: #F9F9F9;
+    font-weight: 600;
+}
+
+.transactions-table td {
+    color: #1F2526;
+    font-weight: 400;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.actions button {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.actions .edit-btn {
+    background-color: #F28C38;
+    color: #1F2526;
+}
+
+.actions .edit-btn:hover {
+    background-color: #D97A30;
+}
+
+.actions .delete-btn {
+    background-color: #FF6B6B;
+    color: #F9F9F9;
+}
+
+.actions .delete-btn:hover {
+    background-color: #E55A5A;
+}
+
+.actions .save-btn {
+    background-color: #BBFBAC;
+    color: #1F2526;
+    display: none;
+}
+
+.actions .save-btn:hover {
+    background-color: #A5E698;
+}
+
+.actions .cancel-btn {
+    background-color: #F28C38;
+    color: #1F2526;
+    display: none;
+}
+
+.actions .cancel-btn:hover {
+    background-color: #D97A30;
+}
+
+.actions.editing .save-btn,
+.actions.editing .cancel-btn {
+    display: flex;
+}
+
+.actions.editing .edit-btn,
+.actions.editing .delete-btn {
+    display: none;
+}
+
+td[contenteditable="true"] {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 4px;
+    outline: none;
+}
+
+.no-transactions {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #F28C38;
+    border-radius: 4px;
+    text-align: center;
+    color: #1F2526;
+    font-weight: 500;
+    display: none;
+}
+
+.no-transactions.show {
+    display: block;
+}
+
+.editable-select,
+.editable-date {
+    padding: 10px;
+    border: 1px solid #7255A5;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #1F2526;
+    font-family: 'Poppins', sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}

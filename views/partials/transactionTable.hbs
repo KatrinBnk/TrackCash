@@ -1,0 +1,31 @@
+<div class="stats-section" id="transactions-section">
+    <h2>{{tableTitle}}</h2>
+    <div id="transactions-content">
+        <table class="transactions-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Дата</th>
+                <th>Тип</th>
+                <th>Сумма</th>
+                <th>Категория</th>
+                <th>Комментарий</th>
+                {{#if showUserDetails}}
+                    <th>ID пользователя</th>
+                    <th>Фамилия</th>
+                    <th>Имя</th>
+                    <th>Отчество</th>
+                {{/if}}
+                {{#unless hideActions}}
+                    <th>Действия</th>
+                {{/unless}}
+            </tr>
+            </thead>
+            <tbody id="transactions-body"></tbody>
+        </table>
+        {{#if showNoTransactions}}
+            <div class="no-transactions">Транзакции отсутствуют</div>
+        {{/if}}
+    </div>
+    {{{extraContent}}}
+</div>
