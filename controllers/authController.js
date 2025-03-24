@@ -104,7 +104,7 @@ export const login = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет подтверждение выхода или сообщение об ошибке через HTTP-ответ.
  */
-export const logout = async (req, res) => {
+export let logout = async (req, res) => {
     try {
         res.clearCookie('token');
         res.status(200).json({ message: 'Выход из системы выполнен успешно' });
