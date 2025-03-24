@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя статистика - CashTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/css/transactionTable.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #F7F2E8;
+            color: #1F2526;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .welcome-message {
+            background-color: #7255A5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            color: #F9F9F9;
+        }
+
+        .welcome-message h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .filter-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: 1px solid #F28C38;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-form input, .filter-form select {
+            padding: 10px;
+            border: 1px solid #7255A5;
+            border-radius: 4px;
+            background-color: #F7F2E8;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            width: 200px;
+        }
+
+        .filter-form input::placeholder {
+            color: #7255A5;
+        }
+
+        .filter-form button {
+            padding: 10px 20px;
+            background-color: #BBFBAC;
+            color: #1F2526;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .filter-form button:hover {
+            background-color: #A5E698;
+        }
+
+        .dropdown {
+            position: relative;
+            width: 200px;
+        }
+
+        .dropdown-toggle {
+            padding: 10px;
+            border: 1px solid #7255A5;
+            border-radius: 4px;
+            background-color: #F7F2E8;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .dropdown-toggle::after {
+            content: '▼';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            border: 1px solid #7255A5;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #BBFBAC;
+        }
+
+        .dropdown-item input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkbox-custom {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            background-color: #F7F2E8;
+            border: 2px solid #7255A5;
+            border-radius: 4px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item input[type="checkbox"]:checked + .checkbox-custom {
+            background-color: #7255A5;
+            border-color: #7255A5;
+        }
+
+        .checkbox-custom::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 5px;
+            border-left: 2px solid #F9F9F9;
+            border-bottom: 2px solid #F9F9F9;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -70%) rotate(-45deg);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .dropdown-item input[type="checkbox"]:checked + .checkbox-custom::after {
+            opacity: 1;
+        }
+
+        .dropdown-item label {
+            font-size: 14px;
+            color: #1F2526;
+            cursor: pointer;
+            user-select: none;
+            flex-grow: 1;
+        }
+
+        .download-btn {
+            padding: 10px 20px;
+            background-color: #7255A5;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            margin-top: 15px;
+        }
+
+        .download-btn:hover {
+            background-color: #8255B9;
+        }
+    </style>
+</head>
+<body>
+{{> employeeHeader}}
+<div class="container">
+    <div class="welcome-message">
+        <h1>Моя статистика</h1>
+    </div>
+
+    <div class="filter-form">
+        <input type="date" id="start-date" placeholder="Дата начала">
+        <input type="date" id="end-date" placeholder="Дата окончания">
+        <div class="dropdown">
+            <div class="dropdown-toggle" id="category-toggle">Категории</div>
+            <div class="dropdown-menu" id="category-menu">
+                <!-- Чекбоксы будут добавлены через JS -->
+            </div>
+        </div>
+        <select id="transaction-type">
+            <option value="">Все типы</option>
+            <option value="income">Доходы</option>
+            <option value="expense">Расходы</option>
+            <option value="balance">Баланс</option>
+        </select>
+        <button id="apply-filters">Применить фильтры</button>
+    </div>
+
+    <div class="stats-section" id="summary-stats">
+        <h2>Сводная статистика</h2>
+        <div id="summary-content"></div>
+        <button class="download-btn" id="download-summary">Скачать CSV</button>
+    </div>
+
+    {{> transactionTable
+            tableTitle="Детализированная статистика"
+            showNoTransactions=true
+            extraContent='<button class="download-btn" id="download-detailed">Скачать CSV</button>'
+    }}
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/transactionTable.js"></script>
+<script>
+    $(document).ready(function () {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        $.ajaxSetup({
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+        });
+
+        let creatorId = null;
+        let categories = [];
+        let transactionTable;
+
+        $.ajax({
+            url: '/api/users/me',
+            method: 'GET',
+            success: function (user) {
+                creatorId = user.id;
+                loadCategories();
+                loadSummaryStats();
+            },
+            error: function () {
+                alert('Ошибка получения данных пользователя');
+            }
+        });
+
+        function loadCategories() {
+            $.ajax({
+                url: '/api/categories',
+                method: 'GET',
+                success: function (data) {
+                    categories = data;
+                    const menu = $('#category-menu');
+                    menu.empty();
+                    categories.forEach(category => {
+                        menu.append(`
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="category-${category.id}" value="${category.id}">
+                                <span class="checkbox-custom"></span>
+                                <label for="category-${category.id}">${category.name}</label>
+                            </div>
+                        `);
+                    });
+                    transactionTable = initializeTransactionTable({
+                        creatorId,
+                        getCategories: () => categories,
+                        queryBuilder: buildQueryParams,
+                        downloadCSVCallback: () => downloadCSV('detailed', 'detailed_statistics.csv')
+                    });
+                },
+                error: function (xhr) {
+                    alert('Ошибка загрузки категорий: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        }
+
+        $('#category-toggle').on('click', function (e) {
+            e.stopPropagation();
+            $('#category-menu').toggleClass('show');
+        });
+
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.dropdown').length) {
+                $('#category-menu').removeClass('show');
+            }
+        });
+
+        $(document).on('click', '.dropdown-item', function (e) {
+            e.stopPropagation();
+            const checkbox = $(this).find('input[type="checkbox"]');
+            checkbox.prop('checked', !checkbox.prop('checked'));
+        });
+
+        function buildQueryParams() {
+            const params = new URLSearchParams();
+            const startDate = $('#start-date').val();
+            const endDate = $('#end-date').val();
+            const selectedCategories = $('#category-menu input:checked').map(function () {
+                return $(this).val();
+            }).get();
+            const transactionType = $('#transaction-type').val();
+
+            if (creatorId) params.append('creatorId', creatorId);
+            if (startDate) params.append('startDate', startDate);
+            if (endDate) params.append('endDate', endDate);
+            if (selectedCategories.length > 0) params.append('categoryIds', selectedCategories.join(','));
+            if (transactionType) params.append('transactionTypes', transactionType);
+
+            return params.toString();
+        }
+
+        function loadSummaryStats() {
+            const query = buildQueryParams();
+            $.ajax({
+                url: `/api/statistics/summary?${query}`,
+                method: 'GET',
+                success: function (stats) {
+                    const content = $('#summary-content');
+                    content.empty();
+                    const summary = `
+                        <p>Общая сумма доходов: ${stats.total.income || 0} руб.</p>
+                        <p>Общая сумма расходов: ${stats.total.expense || 0} руб.</p>
+                        <p>Баланс: ${stats.total.balance || 0} руб.</p>
+                    `;
+                    content.html(summary);
+                },
+                error: function (xhr) {
+                    alert('Ошибка загрузки сводной статистики: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        }
+
+        function downloadCSV(endpoint, filename) {
+            const query = buildQueryParams();
+            $.ajax({
+                url: `/api/statistics/${endpoint}?${query}&format=csv`,
+                method: 'GET',
+                success: function (csvData) {
+                    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', filename);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                },
+                error: function (xhr) {
+                    alert('Ошибка скачивания CSV: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        }
+
+        $('#apply-filters').on('click', function () {
+            loadSummaryStats();
+            transactionTable.refresh();
+        });
+
+        $('#download-summary').on('click', function () {
+            downloadCSV('summary', 'summary_statistics.csv');
+        });
+
+        $('#download-detailed').on('click', function () {
+            downloadCSV('detailed', 'detailed_statistics.csv');
+        });
+    });
+</script>
+</body>
+</html>

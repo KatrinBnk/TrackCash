@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель сотрудника - CashTrack</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #F7F2E8;
+            color: #1F2526;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .welcome-message {
+            background-color: #7255A5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            color: #F9F9F9;
+        }
+
+        .welcome-message h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            font-size: 16px;
+        }
+
+        .info-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #F28C38;
+            margin-bottom: 20px;
+        }
+
+        .info-section h2 {
+            text-align: center;
+            color: #7255A5;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-section li {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .info-section a {
+            font-size: 20px;
+            font-weight: 500;
+            color: #7255A5;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .info-section a:hover {
+            color: #7255A7;
+        }
+
+    </style>
+</head>
+<body>
+{{> employeeHeader}}
+<div class="container">
+    <div id="content">
+        <div class="welcome-message">
+            <h1>Добро пожаловать!</h1>
+            <p>Ваш инструмент для управления финансами</p>
+        </div>
+
+        <div class="info-section">
+            <h2>Что вы можете делать?</h2>
+            <div>
+                <a href="/employee/transactions">Просматривать свои транзакции</a>
+                <p>
+                    Система предоставляет для каждого сотрудника удобный инструмент для отслеживания корпоративных расходов.
+                    Вы можете создавать, редактировать и просматривать свои транзакции, что позволяет наглядно фиксировать свои расходы.
+                </p>
+            </div>
+
+            <div>
+                <a href="/employee/statistics">Получать статистику о доходах и расходах</a>
+                <p>
+                    Система предоставляет удобный инструмент для анализа корпоративных расходов.
+                    Вы можете получать данные о доходах и расходах с удобным импортом в CSV (удобный формат, который можно использовать и в привычных системах от Microsoft, и в более удобных для вас).
+                </p>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

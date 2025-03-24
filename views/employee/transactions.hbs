@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои транзакции - CashTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/css/transactionTable.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #F7F2E8;
+            color: #1F2526;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .welcome-message {
+            background-color: #7255A5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            color: #F9F9F9;
+        }
+
+        .welcome-message h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .transaction-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: 1px solid #F28C38;
+        }
+
+        .transaction-form h3 {
+            margin: 0 0 15px 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #7255A5;
+        }
+
+        .form-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: center;
+        }
+
+        .form-fields input,
+        .form-fields select {
+            padding: 10px;
+            border: 1px solid #7255A5;
+            border-radius: 4px;
+            background-color: #F7F2E8;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .form-fields input::placeholder {
+            color: #7255A5;
+        }
+
+        .form-fields button {
+            padding: 10px 20px;
+            background-color: #BBFBAC;
+            color: #1F2526;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .form-fields button:hover {
+            background-color: #A5E698;
+        }
+
+        .download-btn {
+            padding: 10px 20px;
+            background-color: #7255A5;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            margin-top: 15px;
+        }
+
+        .download-btn:hover {
+            background-color: #8255B9;
+        }
+    </style>
+</head>
+<body>
+{{> employeeHeader}}
+<div class="container">
+    <div class="welcome-message">
+        <h1>Мои транзакции</h1>
+    </div>
+
+    <div class="transaction-form" id="add-transaction-form">
+        <h3>Добавить транзакцию</h3>
+        <div class="form-fields">
+            <select id="transaction-type" required>
+                <option value="" disabled selected>Тип транзакции</option>
+                <option value="income">Доход</option>
+                <option value="expense">Расход</option>
+            </select>
+            <input type="number" id="transaction-amount" placeholder="Сумма (руб.)" required min="0" step="0.01">
+            <input type="date" id="transaction-date" required>
+            <select id="transaction-category">
+                <option value="" selected>Без категории</option>
+            </select>
+            <input type="text" id="transaction-comment" placeholder="Комментарий" maxlength="50">
+            <button id="submit-transaction">Добавить транзакцию</button>
+        </div>
+    </div>
+
+    {{> transactionTable
+            tableTitle="Список транзакций"
+            showNoTransactions=true
+            extraContent='<button class="download-btn" id="download-transactions">Скачать CSV</button>'
+    }}
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/transactionTable.js"></script>
+<script>
+    $(document).ready(function () {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        $.ajaxSetup({
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+        });
+
+        let creatorId = null;
+        let categories = [];
+        let transactionTable;
+
+        $.ajax({
+            url: '/api/users/me',
+            method: 'GET',
+            success: function (user) {
+                creatorId = user.id;
+                loadCategories();
+            },
+            error: function () {
+                alert('Ошибка получения данных пользователя');
+            }
+        });
+
+        function loadCategories() {
+            $.ajax({
+                url: '/api/categories',
+                method: 'GET',
+                success: function (data) {
+                    categories = data;
+                    const categorySelect = $('#transaction-category');
+                    categorySelect.empty();
+                    categorySelect.append('<option value="" selected>Без категории</option>');
+                    categories.forEach(category => {
+                        categorySelect.append(`<option value="${category.id}">${category.name}</option>`);
+                    });
+                    transactionTable = initializeTransactionTable({
+                        creatorId,
+                        getCategories: () => categories,
+                        downloadCSVCallback: () => downloadCSV('detailed', 'transactions.csv')
+                    });
+                },
+                error: function (xhr) {
+                    alert('Ошибка загрузки категорий: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        }
+
+        function downloadCSV(endpoint, filename) {
+            const query = `creatorId=${creatorId}`;
+            $.ajax({
+                url: `/api/statistics/${endpoint}?${query}&format=csv`,
+                method: 'GET',
+                success: function (csvData) {
+                    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', filename);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                },
+                error: function (xhr) {
+                    alert('Ошибка скачивания CSV: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        }
+
+        $('#submit-transaction').on('click', function () {
+            const type = $('#transaction-type').val();
+            const amount = parseFloat($('#transaction-amount').val());
+            const date = $('#transaction-date').val();
+            const categoryId = $('#transaction-category').val() || null;
+            const comment = $('#transaction-comment').val() || null;
+
+            if (!type || !amount || amount <= 0 || !date) {
+                alert('Укажите корректные тип, сумму и дату!');
+                return;
+            }
+
+            const transactionData = {
+                userId: creatorId,
+                type,
+                amount,
+                date,
+                categoryId,
+                comment
+            };
+
+            $.ajax({
+                url: '/api/transactions',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(transactionData),
+                success: function (response) {
+                    alert(response.message);
+                    resetForm();
+                    transactionTable.refresh();
+                },
+                error: function (xhr) {
+                    alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        });
+
+        $('#download-transactions').on('click', function () {
+            downloadCSV('detailed', 'transactions.csv');
+        });
+
+        function resetForm() {
+            $('#transaction-type').val('');
+            $('#transaction-amount').val('');
+            $('#transaction-date').val('');
+            $('#transaction-category').val('');
+            $('#transaction-comment').val('');
+        }
+    });
+</script>
+</body>
+</html>
