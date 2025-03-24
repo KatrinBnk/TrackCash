@@ -87,10 +87,16 @@ class Statistics {
             values.push(endDate);
         }
         if (categoryIds && categoryIds.length > 0) {
-            conditions.push('t.category_id IN (?)');
-            values.push(categoryIds);
+            const categoryString = categoryIds[0];
+            const parsedCategoryIds = categoryString
+                .split(',')
+                .map(id => id.trim())
+                .filter(id => id);
+            if (parsedCategoryIds.length > 0) {
+                conditions.push('t.category_id IN (?)');
+                values.push(parsedCategoryIds);
+            }
         }
-        console.log(transactionTypes)
         if (transactionTypes) {
             let typesArray = transactionTypes[0];
             typesArray = typesArray.split(',').map(type => type.trim()).filter(type => type);
