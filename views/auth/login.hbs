@@ -9,7 +9,7 @@
         body {
             margin: 0;
             font-family: 'Poppins', Arial, sans-serif;
-            background-color: #F7F2E8; /* Cloud Dancer как основной фон */
+            background-color: #F7F2E8;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -17,18 +17,18 @@
         }
 
         .login-container {
-            background-color: #7255A5; /* Blue Violet для фона контейнера */
+            background-color: #7255A5;
             padding: 30px 40px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             width: 100%;
             max-width: 400px;
             text-align: center;
-            color: #F9F9F9; /* Почти белый для текста */
+            color: #F9F9F9;
         }
 
         .login-container h2 {
-            color: #F9F9F9; /* Почти белый для заголовка */
+            color: #F9F9F9;
             font-size: 24px;
             margin-bottom: 25px;
             font-weight: 600;
@@ -44,25 +44,25 @@
             width: 100%;
             box-sizing: border-box;
             padding: 12px;
-            border: 1px solid #F28C38; /* Exuberant Orange для рамок */
+            border: 1px solid #F28C38;
             border-radius: 4px;
             font-size: 16px;
-            background-color: #F7F2E8; /* Cloud Dancer для фона ввода */
-            color: #1F2526; /* Darkest Hour для текста */
+            background-color: #F7F2E8;
+            color: #1F2526;
             outline: none;
             font-family: 'Poppins', sans-serif;
         }
 
         .login-form input::placeholder {
-            color: #7255A5; /* Blue Violet для placeholder */
+            color: #7255A5;
         }
 
         .login-form button {
             width: 100%;
             box-sizing: border-box;
             padding: 12px;
-            background-color: #BBFBAC; /* Светло-зелёный для кнопки */
-            color: #1F2526; /* Darkest Hour для текста */
+            background-color: #BBFBAC;
+            color: #1F2526;
             border: none;
             border-radius: 4px;
             font-size: 16px;
@@ -73,17 +73,17 @@
         }
 
         .login-form button:hover {
-            background-color: #A5E698; /* Темнее светло-зелёного при наведении */
+            background-color: #A5E698;
             color: #1F2526;
         }
 
         .login-form button:active {
-            background-color: #9AD98F; /* Ещё темнее светло-зелёного при нажатии */
+            background-color: #9AD98F;
             color: #1F2526;
         }
 
         .error-message {
-            color: #F28C38; /* Exuberant Orange для сообщений об ошибке */
+            color: #F28C38;
             font-size: 14px;
             margin-top: 15px;
             font-weight: 400;
@@ -117,6 +117,14 @@
                 data: JSON.stringify({ username, password }),
                 success: function (response) {
                     localStorage.setItem('token', response.token);
+
+                    $.ajaxSetup({
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + response.token);
+                        }
+                    });
+
+
                     window.location.href = `/${response.user.role}`
                 },
                 error: function (xhr) {
