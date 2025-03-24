@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление категориями - CashTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #F7F2E8;
+            color: #1F2526;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .welcome-message {
+            background-color: #7255A5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            color: #F9F9F9;
+        }
+
+        .welcome-message h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .category-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: 1px solid #F28C38;
+        }
+
+        .category-form input {
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #7255A5;
+            border-radius: 4px;
+            background-color: #F7F2E8;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            width: 300px;
+            margin-bottom: 10px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .category-form input:focus {
+            border-color: #A5E698;
+            box-shadow: 0 0 5px rgba(165, 230, 152, 0.5);
+            outline: none;
+        }
+
+        .category-form input::placeholder {
+            color: #7255A5;
+        }
+
+        .category-form button {
+            padding: 10px 20px;
+            background-color: #BBFBAC;
+            color: #1F2526;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .category-form button:hover {
+            background-color: #A5E698;
+            box-shadow: 0 2px 8px rgba(165, 230, 152, 0.4);
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #F28C38;
+            border-radius: 4px;
+            background-color: #fff;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            border-color: #F28C38;
+            box-shadow: 0 0 5px rgba(242, 140, 56, 0.5);
+            outline: none;
+        }
+
+        .search-bar input::placeholder {
+            color: #7255A5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #7255A5;
+        }
+
+        th {
+            background-color: #7255A5;
+            color: #F9F9F9;
+            font-weight: 600;
+        }
+
+        td {
+            color: #1F2526;
+            font-weight: 400;
+            transition: background-color 0.3s ease;
+        }
+
+        tr:hover td {
+            background-color: #F7F2E8;
+        }
+
+
+        .actions-buttons {
+            display: flex;
+            gap: 5px
+        }
+
+        .actions button {
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .actions .edit-btn {
+            background-color: #BBFBAC;
+            color: #1F2526;
+        }
+
+        .actions .edit-btn:hover {
+            background-color: #A5E698;
+            box-shadow: 0 2px 8px rgba(165, 230, 152, 0.4);
+        }
+
+        .actions .delete-btn {
+            background-color: #F28C38;
+            color: #1F2526;
+        }
+
+        .actions .delete-btn:hover {
+            background-color: #D97A30;
+            box-shadow: 0 2px 8px rgba(242, 140, 56, 0.4);
+        }
+
+        .actions .save-btn {
+            background-color: #BBFBAC;
+            color: #1F2526;
+            display: none;
+        }
+
+        .actions .save-btn:hover {
+            background-color: #A5E698;
+            box-shadow: 0 2px 8px rgba(165, 230, 152, 0.4);
+        }
+
+        .actions .cancel-btn {
+            background-color: #F28C38;
+            color: #1F2526;
+            display: none;
+        }
+
+        .actions .cancel-btn:hover {
+            background-color: #D97A30;
+            box-shadow: 0 2px 8px rgba(242, 140, 56, 0.4);
+        }
+
+        .actions.editing .save-btn,
+        .actions.editing .cancel-btn {
+            display: flex;
+        }
+
+        .actions.editing .edit-btn,
+        .actions.editing .delete-btn {
+            display: none;
+        }
+
+        .editable-input {
+            padding: 8px;
+            border: 1px solid #7255A5;
+            border-radius: 4px;
+            background-color: #F7F2E8;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .editable-input:focus {
+            border-color: #A5E698;
+            box-shadow: 0 0 5px rgba(165, 230, 152, 0.5);
+        }
+    </style>
+</head>
+<body>
+{{> managerHeader}}
+<div class="container">
+    <div class="welcome-message">
+        <h1>Добро пожаловать, Менеджер!</h1>
+        <p>Управление категориями расходов отдела</p>
+    </div>
+
+    <div class="category-form">
+        <input type="text" id="category-name" placeholder="Название категории" required maxlength="30">
+        <button id="submit-category"><i class="fas fa-plus"></i> Добавить</button>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" id="search-category" placeholder="Поиск по названию" maxlength="30">
+    </div>
+
+    <table id="categories-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody id="categories-body"></tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        $.ajaxSetup({
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+        });
+
+        function loadCategories(searchQuery = '') {
+            $.ajax({
+                url: '/api/categories' + (searchQuery ? `?name=${encodeURIComponent(searchQuery)}` : ''),
+                method: 'GET',
+                success: function (categories) {
+                    const tbody = $('#categories-body');
+                    tbody.empty();
+
+                    categories.forEach(category => {
+                        const row = `
+                            <tr data-id="${category.id}">
+                                <td>${category.id}</td>
+                                <td>${category.name || ''}</td>
+                                <td class="actions">
+                                    <div class="actions-buttons">
+                                    <button class="edit-btn"><i class="fas fa-edit"></i></button>
+                                    <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                                    <button class="save-btn"><i class="fas fa-save"></i></button>
+                                    <button class="cancel-btn"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                },
+                error: function (xhr) {
+                    alert('Ошибка загрузки категорий: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        }
+
+        loadCategories();
+
+        $('#search-category').on('input', function () {
+            loadCategories($(this).val());
+        });
+
+        // Добавление категории
+        $('#submit-category').on('click', function () {
+            const name = $('#category-name').val().trim();
+
+            if (!name) {
+                alert('Название категории обязательно!');
+                return;
+            }
+
+            $.ajax({
+                url: '/api/categories',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ name }),
+                success: function (response) {
+                    alert(response.message);
+                    loadCategories();
+                    $('#category-name').val('');
+                },
+                error: function (xhr) {
+                    alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                }
+            });
+        });
+
+        // Редактирование категории
+        $('#categories-table').on('click', '.edit-btn', function () {
+            const row = $(this).closest('tr');
+            const actions = row.find('.actions');
+            const id = row.data('id');
+            const nameCell = row.find('td:eq(1)');
+            const originalName = nameCell.text();
+
+            // Заменяем текст в ячейке на input
+            nameCell.html(`<input type="text" class="editable-input" value="${originalName}" maxlength="30">`);
+            const inputField = nameCell.find('input');
+            inputField.focus();
+
+            // Добавляем обработчик для Enter
+            inputField.on('keypress', function (e) {
+                if (e.which === 13) { // Enter
+                    e.preventDefault();
+                    actions.find('.save-btn').click();
+                }
+            });
+
+            actions.addClass('editing');
+
+            actions.find('.save-btn').off('click').on('click', function () {
+                const newName = inputField.val().trim();
+
+                if (!newName) {
+                    alert('Название категории обязательно!');
+                    return;
+                }
+
+                $.ajax({
+                    url: `/api/categories/${id}`,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ name: newName }),
+                    success: function (response) {
+                        alert(response.message);
+                        actions.removeClass('editing');
+                        nameCell.text(newName);
+                        loadCategories($('#search-category').val());
+                    },
+                    error: function (xhr) {
+                        alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                    }
+                });
+            });
+
+            actions.find('.cancel-btn').off('click').on('click', function () {
+                actions.removeClass('editing');
+                nameCell.text(originalName);
+            });
+        });
+
+        // Удаление категории
+        $('#categories-table').on('click', '.delete-btn', function () {
+            const row = $(this).closest('tr');
+            const id = row.data('id');
+
+            if (confirm('Вы уверены, что хотите удалить эту категорию?')) {
+                $.ajax({
+                    url: `/api/categories/${id}`,
+                    method: 'DELETE',
+                    success: function () {
+                        alert('Категория успешно удалена');
+                        loadCategories($('#search-category').val());
+                    },
+                    error: function (xhr) {
+                        alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                    }
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>
