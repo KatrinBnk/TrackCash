@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель менеджера - CashTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #F7F2E8;
+            color: #1F2526;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .welcome-message {
+            background-color: #7255A5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            color: #F9F9F9;
+        }
+
+        .welcome-message h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            font-size: 16px;
+        }
+
+        .info-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #F28C38;
+            margin-bottom: 20px;
+        }
+
+        .info-section h2 {
+            text-align: center;
+            color: #7255A5;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .info-section div {
+            margin-bottom: 20px;
+        }
+
+        .info-section a {
+            font-size: 20px;
+            font-weight: 500;
+            color: #7255A5;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-section a:hover {
+            color: #8255B9;
+        }
+
+        .info-section p {
+            font-size: 16px;
+            margin: 0;
+            color: #1F2526;
+        }
+    </style>
+</head>
+<body>
+{{> managerHeader}}
+<div class="container">
+    <div id="content">
+        <div class="welcome-message">
+            <h1>Добро пожаловать, менеджер!</h1>
+            <p>Ваш инструмент для управления финансами компании</p>
+        </div>
+
+        <div class="info-section">
+            <h2>Что вы можете делать?</h2>
+            <div>
+                <a href="/manager/statistics">Анализировать статистику расходов</a>
+                <p>
+                    Система предоставляет удобный инструмент для анализа корпоративных расходов по своему отделу.
+                    Вы можете фильтровать данные, просматривать детализированную статистику и экспортировать её в CSV для дальнейшего анализа.
+                </p>
+            </div>
+
+            <div>
+                <a href="/manager/categories">Управлять статьями расходов</a>
+                <p>
+                    Вы можете просматривать список статей (категорий), который доступны сотрудникам вашего отдела. Вы можете добавлять новые статьи, удалять и редактировать существующие.
+                    Это позволяет вам контролировать расходы и улучшать отслеживание финансов компании.
+                </p>
+            </div>
+
+            <div>
+                <a href="/manager/balance">Определять основной баланс для сотрудников отдела</a>
+                <p>
+                    Система предоставляет удобный инструмент для фиксирования основного баланса сотрудников вашего отдела.
+                    Под балансом подразумевается сумма, выплачиваемая сотрудников для покрытия корпоративных расходов (питание, дорога и пр).
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
