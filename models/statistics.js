@@ -35,8 +35,8 @@ class Statistics {
                 throw { status: 400, message: 'Укажите либо departmentId, либо userIds, но не оба' };
             }
             if (departmentId) {
-                if (departmentId !== creator.department_id) {
-                    throw { status: 403, message: 'Менеджер может запрашивать статистику только своего отдела' };
+                if (departmentId != creator.department_id) {
+                    throw { status: 403, message: 'Менеджер может запрашивать статистику только своего отдела:' };
                 }
                 conditions.push('u.department_id = ?');
                 values.push(departmentId);
