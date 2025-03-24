@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добро пожаловать - CashTrack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #F7F2E8;
+            color: #1F2526;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .welcome-section {
+            background-color: #7255A5;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            color: #F9F9F9;
+        }
+
+        .welcome-section h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .welcome-section p {
+            font-size: 18px;
+            font-weight: 400;
+        }
+
+        .stats-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: 1px solid #F28C38;
+        }
+
+        .stats-section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1F2526;
+        }
+
+        .stats-section p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+
+        .actions-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            background-color: #BBFBAC;
+            color: #1F2526;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .action-btn:hover {
+            background-color: #A5E698;
+            box-shadow: 0 2px 8px rgba(165, 230, 152, 0.4);
+        }
+
+        .action-btn i {
+            margin-right: 8px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="welcome-section" id="welcome-section">
+        <h1>Добро пожаловать в CashTrack!</h1>
+        <p id="welcome-message">Войдите, чтобы начать управлять финансами.</p>
+    </div>
+
+    <div class="stats-section hidden" id="stats-section">
+        <div id="stats-content"></div>
+    </div>
+
+    <div class="actions-section" id="actions-section"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const token = localStorage.getItem('token');
+        const welcomeSection = $('#welcome-section');
+        const welcomeMessage = $('#welcome-message');
+        const statsSection = $('#stats-section');
+        const statsContent = $('#stats-content');
+        const actionsSection = $('#actions-section');
+
+        if (!token) {
+            actionsSection.html(`
+                <a href="/login" class="action-btn">
+                    <i class="fas fa-sign-in-alt"></i> Войти
+                </a>
+            `);
+        } else {
+            $.ajax({
+                url: '/api/users/me',
+                method: 'GET',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                },
+                success: function (user) {
+                    console.log('Данные пользователя:', user);
+                    // Обновляем приветствие
+                    welcomeMessage.text(`Привет, ${user.name || 'Пользователь'}!`);
+
+                    // Показываем статистику
+                    statsSection.removeClass('hidden');
+                    loadSummaryStats(user);
+
+                    // Показываем кнопки в зависимости от роли
+                    if (user.role === 'manager') {
+                        actionsSection.html(`
+                            <a href="/manager/statistics" class="action-btn">
+                                <i class="fas fa-chart-bar"></i> Статистика отдела
+                            </a>
+                            <a href="/manager/categories" class="action-btn">
+                                <i class="fas fa-tags"></i> Управление категориями
+                            </a>
+                            <a onclick="logout()" class="action-btn">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </a>
+                        `);
+                    } else if (user.role === 'employee') {
+                        actionsSection.html(`
+                            <a href="/employee/statistics" class="action-btn">
+                                <i class="fas fa-chart-bar"></i> Моя статистика
+                            </a>
+                            <a href="/employee/transactions" class="action-btn">
+                                <i class="fas fa-money-bill-wave"></i> Мои транзакции
+                            </a>
+                            <a onclick="logout()" class="action-btn">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </a>
+                        `);
+                    } else if (user.role === 'admin') {
+                        actionsSection.html(`
+                            <a href="/admin/employees" class="action-btn">
+                                <i class="fas fa-users"></i> Управление пользователями
+                            </a>
+                            <a href="/admin/departments" class="action-btn">
+                                <i class="fas fa-building"></i> Управление отделами
+                            </a>
+                            <a onclick="logout()" class="action-btn">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </a>
+                        `);
+                    } else {
+                        actionsSection.html(`
+                            <a onclick="logout()" class="action-btn">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </a>
+                        `);
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Ошибка получения данных пользователя:', xhr.responseJSON?.message || 'Неизвестная ошибка');
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                }
+            });
+        }
+
+        function loadSummaryStats(user) {
+            let query = '';
+            if (user.role === 'employee') {
+                query = `creatorId=${user.id}`;
+            } else if (user.role === 'manager') {
+                query = `departmentId=${user.departmentId}`;
+            }
+
+            $.ajax({
+                url: `/api/statistics/summary${query ? '?' + query : ''}`,
+                method: 'GET',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                },
+                success: function (stats) {
+                    console.log('Статистика загружена:', stats);
+                    statsContent.html(`
+                        <h2>Ваша статистика</h2>
+                        <p>Общая сумма доходов: ${stats.total.income || 0} руб.</p>
+                        <p>Общая сумма расходов: ${stats.total.expense || 0} руб.</p>
+                        <p>Баланс: ${stats.total.balance || 0} руб.</p>
+                    `);
+                },
+                error: function (xhr) {
+                    if (user.role !== 'admin') {
+                        console.error('Ошибка загрузки статистики:', xhr.responseJSON?.message || 'Неизвестная ошибка');
+                        statsContent.html('<p>Не удалось загрузить статистику.</p>');
+                    }
+                }
+            });
+        }
+
+        window.logout = function() {
+            localStorage.removeItem('token');
+
+            $.ajax({
+                url: '/api/auth/logout',
+                method: 'POST',
+                success: function (response) {
+                    window.location.href = '/login';
+                },
+                error: function (xhr) {
+                    console.error('Ошибка при выходе:', xhr.responseJSON?.message || 'Неизвестная ошибка');
+                    window.location.href = '/login';
+                }
+            });
+        };
+    });
+</script>
+</body>
+</html>

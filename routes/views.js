@@ -3,6 +3,11 @@ import { checkRole, authenticateToken, requireAdmin, requireManager, requireEmpl
 
 const router = express.Router();
 
+// Главная страница
+router.get('/', (req, res) => {
+    res.render('index');
+});
+
 // Страница логина
 router.get('/login', (req, res) => {
     res.render('auth/login');
@@ -49,6 +54,11 @@ router.get('/employee/statistics', checkRole('employee'), (req, res) => {
 
 router.get('/employee/transactions', checkRole('employee'), (req, res) => {
     res.render('employee/transactions');
+});
+
+// 404
+router.use((req, res, next) => {
+    res.status(404).render('404');
 });
 
 export default router;
