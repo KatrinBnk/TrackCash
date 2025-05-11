@@ -218,12 +218,26 @@
                 <!-- Чекбоксы будут добавлены через JS -->
             </div>
         </div>
-        <select id="transaction-type">
-            <option value="">Все типы</option>
-            <option value="income">Доходы</option>
-            <option value="expense">Расходы</option>
-            <option value="balance">Баланс</option>
-        </select>
+        <div class="dropdown">
+            <div class="dropdown-toggle" id="type-toggle">Типы транзакций</div>
+            <div class="dropdown-menu" id="type-menu">
+                <div class="dropdown-item">
+                    <input type="checkbox" id="type-income" value="income">
+                    <span class="checkbox-custom"></span>
+                    <label for="type-income">Доходы</label>
+                </div>
+                <div class="dropdown-item">
+                    <input type="checkbox" id="type-expense" value="expense">
+                    <span class="checkbox-custom"></span>
+                    <label for="type-expense">Расходы</label>
+                </div>
+                <div class="dropdown-item">
+                    <input type="checkbox" id="type-balance" value="balance">
+                    <span class="checkbox-custom"></span>
+                    <label for="type-balance">Баланс</label>
+                </div>
+            </div>
+        </div>
         <button id="apply-filters">Применить фильтры</button>
     </div>
 
@@ -303,14 +317,20 @@
             });
         }
 
+        // Обработчики для выпадающих списков
         $('#category-toggle').on('click', function (e) {
             e.stopPropagation();
             $('#category-menu').toggleClass('show');
         });
 
+        $('#type-toggle').on('click', function (e) {
+            e.stopPropagation();
+            $('#type-menu').toggleClass('show');
+        });
+
         $(document).on('click', function (e) {
             if (!$(e.target).closest('.dropdown').length) {
-                $('#category-menu').removeClass('show');
+                $('.dropdown-menu').removeClass('show');
             }
         });
 
@@ -327,13 +347,15 @@
             const selectedCategories = $('#category-menu input:checked').map(function () {
                 return $(this).val();
             }).get();
-            const transactionType = $('#transaction-type').val();
+            const selectedTypes = $('#type-menu input:checked').map(function () {
+                return $(this).val();
+            }).get();
 
             if (creatorId) params.append('creatorId', creatorId);
             if (startDate) params.append('startDate', startDate);
             if (endDate) params.append('endDate', endDate);
             if (selectedCategories.length > 0) params.append('categoryIds', selectedCategories.join(','));
-            if (transactionType) params.append('transactionTypes', transactionType);
+            if (selectedTypes.length > 0) params.append('transactionTypes', selectedTypes.join(','));
 
             return params.toString();
         }

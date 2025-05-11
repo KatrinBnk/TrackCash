@@ -191,12 +191,35 @@ class User {
      * @returns {Promise<Object>} - Возвращает созданного пользователя с его ID и основными данными.
      */
     static async create({ username, password, surname, name, patronymic, role, department_id }) {
+        // Если пользователь — менеджер и указан department_id, проверяем отдел
+        if (role === 'manager' && department_id) {
+            const [department] = await db.query('SELECT * FROM Departments WHERE id = ?', [department_id]);
+            if (!department.length) {
+                throw { status: 400, message: 'Отдела с таким идентификатором не существует' };
+            }
+            if (department[0].manager_id) {
+                throw { status: 400, message: 'В указанном отделе уже есть менеджер' };
+            }
+        }
+
+        // Создаём пользователя
         const [result] = await db.query(
             'INSERT INTO Users (username, password, surname, name, patronymic, role, department_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [username, password, surname, name, patronymic, role, department_id || null]
         );
+
+        const newUserId = result.insertId;
+
+        // Если пользователь — менеджер, обновляем таблицу Departments
+        if (role === 'manager' && department_id) {
+            await db.query(
+                'UPDATE Departments SET manager_id = ? WHERE id = ?',
+                [newUserId, department_id]
+            );
+        }
+
         return {
-            id: result.insertId,
+            id: newUserId,
             username,
             surname,
             name,

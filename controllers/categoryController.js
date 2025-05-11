@@ -101,14 +101,14 @@ export const updateCategory = async (req, res) => {
  */
 export const deleteCategory = async (req, res) => {
     const managerId = req.user.id;
-    const { categoryId } = req.params;
+    const { id } = req.params;
 
-    if (!categoryId) {
+    if (!id) {
         return res.status(400).json({ message: 'ID категории обязателен' });
     }
 
     try {
-        await Category.delete(managerId, categoryId);
+        await Category.delete(managerId, id);
         res.status(204).send();
     } catch (err) {
         res.status(err.status || 500).json({ message: err.message });

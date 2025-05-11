@@ -260,13 +260,6 @@
     <!-- Добавляем панель фильтрации -->
     <div class="filter-bar">
         <input type="text" id="search-user" placeholder="Поиск по любому полю">
-        <select id="filter-role">
-            <option value="">Все роли</option>
-            <option value="admin">Администратор</option>
-            <option value="manager">Менеджер</option>
-            <option value="employee">Сотрудник</option>
-        </select>
-        <input type="number" id="filter-department" placeholder="ID отдела">
     </div>
 
     <table id="users-table">
@@ -427,7 +420,7 @@
             };
 
 
-            row.find('td:not(:last-child):not(:eq(5)):not(:first-child)').attr('contenteditable', true);
+            row.find('td:not(:last-child):not(:eq(5)):not(:first-child):not(:eq(0))').attr('contenteditable', true);
 
             actions.addClass('editing');
 

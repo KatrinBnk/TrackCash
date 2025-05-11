@@ -76,7 +76,7 @@ class Department {
             if (!manager) {
                 throw { status: 400, message: 'Недопустимый manager_id: пользователь должен быть менеджером' };
             }
-            if (manager.department_id) {
+            if (manager.department_id != id) {
                 throw { status: 400, message: `Менеджер с ID ${manager_id} уже привязан к отделу ${manager.department_id}` };
             }
             updates.push('manager_id = ?');
