@@ -4,17 +4,17 @@
         <table class="transactions-table">
             <thead>
             <tr>
-                <th>ID</th>
-                <th>Дата</th>
-                <th>Тип</th>
-                <th>Сумма</th>
-                <th>Категория</th>
-                <th>Комментарий</th>
+                <th data-column="id">ID</th>
+                <th data-column="date">Дата</th>
+                <th data-column="type">Тип</th>
+                <th data-column="amount">Сумма</th>
+                <th data-column="categoryName">Категория</th>
+                <th data-column="comment">Комментарий</th>
                 {{#if showUserDetails}}
-                    <th>ID пользователя</th>
-                    <th>Фамилия</th>
-                    <th>Имя</th>
-                    <th>Отчество</th>
+                    <th data-column="userId">ID пользователя</th>
+                    <th data-column="surname">Фамилия</th>
+                    <th data-column="name">Имя</th>
+                    <th data-column="patronymic">Отчество</th>
                 {{/if}}
                 {{#unless hideActions}}
                     <th>Действия</th>

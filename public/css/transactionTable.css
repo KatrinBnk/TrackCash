@@ -199,3 +199,14 @@ td[contenteditable="true"] {
     -webkit-appearance: none;
     -moz-appearance: none;
 }
+
+.sort-indicator {
+    margin-left: 5px;
+    font-size: 0.8em;
+    color: #ffffff;
+}
+
+th[data-column] {
+    cursor: pointer;
+    user-select: none;
+}

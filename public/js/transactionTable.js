@@ -10,6 +10,49 @@ function initializeTransactionTable(options) {
         downloadCSVCallback
     } = options;
 
+    let currentSort = {
+        column: null,
+        direction: 'asc'
+    };
+
+    function sortTransactions(transactions, column, direction) {
+        return [...transactions].sort((a, b) => {
+            let valueA = a[column];
+            let valueB = b[column];
+
+            // Для поддержки сортировки столбцов всех типов
+            if (column === 'date') {
+                valueA = new Date(valueA).getTime();
+                valueB = new Date(valueB).getTime();
+            } else if (column === 'amount') {
+                valueA = parseFloat(valueA);
+                valueB = parseFloat(valueB);
+            } else if (column === 'type') {
+                const typeMap = { 'income': 'Доход', 'expense': 'Расход', 'balance': 'Баланс' };
+                valueA = typeMap[valueA] || valueA;
+                valueB = typeMap[valueB] || valueB;
+            }
+
+            if (direction === 'asc') {
+                return valueA > valueB ? 1 : -1;
+            } else {
+                return valueA < valueB ? 1 : -1;
+            }
+        });
+    }
+
+    function updateSortIndicators(column) {
+        // Удаляем все стрелки
+        $('.sort-indicator').remove();
+        
+        if (column) {
+            // Добавляем стрелку к текущей колонке
+            const header = $(`th[data-column="${column}"]`);
+            const indicator = currentSort.direction === 'asc' ? '↑' : '↓';
+            header.append(`<span class="sort-indicator">${indicator}</span>`);
+        }
+    }
+
     function loadTransactions() {
         const query = queryBuilder ? queryBuilder() : `creatorId=${creatorId}`;
         $.ajax({
@@ -24,7 +67,12 @@ function initializeTransactionTable(options) {
                 const transactions = stats.transactions;
 
                 if (transactions && Array.isArray(transactions) && transactions.length > 0) {
-                    transactions.forEach(tx => {
+                    // Сортируем транзакции, если есть активная сортировка
+                    const sortedTransactions = currentSort.column ? 
+                        sortTransactions(transactions, currentSort.column, currentSort.direction) : 
+                        transactions;
+
+                    sortedTransactions.forEach(tx => {
                         const canEdit = userRole === 'manager' ? tx.type === 'balance' : tx.type !== 'balance';
                         const row = `
                             <tr data-id="${tx.id}" data-type="${tx.type}" data-category-id="${tx.categoryId || ''}">
@@ -70,6 +118,22 @@ function initializeTransactionTable(options) {
         });
     }
 
+    $('th[data-column]').on('click', function() {
+        const column = $(this).data('column');
+        
+        if (currentSort.column === column) {
+            // Если кликнули по той же колонке, меняем направление
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Если кликнули по новой колонке, устанавливаем направление по умолчанию
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+
+        updateSortIndicators(column);
+        loadTransactions();
+    });
+
     $('#transactions-body').on('click', '.edit-btn', function () {
         const row = $(this).closest('tr');
         const actions = row.find('.actions');
@@ -104,7 +168,7 @@ function initializeTransactionTable(options) {
         const categoryCell = row.find('td:eq(4)');
         const currentCategoryId = categoryCell.data('category-id') || '';
         let categoryOptions = '<option value="">Без категории</option>';
-        const categories = getCategories(); // Получаем актуальные категории в момент редактирования
+        const categories = getCategories();
         categories.forEach(category => {
             categoryOptions += `<option  <option value="${category.id}" ${currentCategoryId == category.id ? 'selected' : ''}>${category.name}</option>`;
         });
