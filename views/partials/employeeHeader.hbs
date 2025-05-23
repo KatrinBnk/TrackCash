@@ -6,28 +6,27 @@
         <ul class="nav-menu">
             <li><a href="/employee/transactions">Мои транзакции</a></li>
             <li><a href="/employee/statistics">Статистика</a></li>
-            <li><a onclick="logout()">Выйти</a></li>
+            <li><a href="#" id="logout-btn">Выйти</a></li>
         </ul>
     </nav>
 </header>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/auth.js"></script>
 <script>
-    function logout() {
-        // Очищаем localStorage
-        localStorage.removeItem('token');
-
-        $.ajax({
-            url: '/api/auth/logout',
-            method: 'POST',
-            success: function (response) {
-                window.location.href = '/login';
-            },
-            error: function (xhr) {
-                console.error('Ошибка при выходе:', xhr.responseJSON?.message || 'Неизвестная ошибка');
-            }
+    $(document).ready(function() {
+        $('#logout-btn').on('click', function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/api/auth/logout',
+                method: 'POST',
+                success: function() {
+                    removeToken();
+                    window.location.href = '/login';
+                }
+            });
         });
-    }
+    });
 </script>
 
 <style>
