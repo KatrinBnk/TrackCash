@@ -1,6 +1,6 @@
-import User from '../models/user.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+const User = require('../models/user.js');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const SALT_ROUNDS = 10;
 
@@ -21,7 +21,7 @@ const SALT_ROUNDS = 10;
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет созданного пользователя или сообщение об ошибке через HTTP-ответ.
  */
-export const register = async (req, res) => {
+const register = async (req, res) => {
     const { username, password, surname, name, patronymic, role, department_id } = req.body;
 
     if (!username || !password || !surname || !name || !patronymic || !role) {
@@ -62,7 +62,7 @@ export const register = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет токен и данные пользователя или сообщение об ошибке через HTTP-ответ.
  */
-export const login = async (req, res) => {
+const login = async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -104,11 +104,17 @@ export const login = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет подтверждение выхода или сообщение об ошибке через HTTP-ответ.
  */
-export let logout = async (req, res) => {
+const logout = async (req, res) => {
     try {
         res.clearCookie('token');
         res.status(200).json({ message: 'Выход из системы выполнен успешно' });
     } catch (err) {
         res.status(err.status || 500).json({ message: err.message });
     }
+};
+
+module.exports = {
+    register,
+    login,
+    logout
 };

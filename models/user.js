@@ -1,4 +1,4 @@
-import db from '../config/db.js';
+const db = require('../config/db.js');
 
 class User {
     /**
@@ -229,4 +229,4 @@ class User {
     }
 }
 
-export default User;
+module.exports = User;

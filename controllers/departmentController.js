@@ -1,4 +1,4 @@
-import Department from '../models/department.js';
+const Department = require('../models/department.js');
 
 /**
  * Создаёт новый отдел с указанным названием и опциональным менеджером.
@@ -14,7 +14,7 @@ import Department from '../models/department.js';
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет созданный отдел или сообщение об ошибке через HTTP-ответ.
  */
-export const createDepartment = async (req, res) => {
+const createDepartment = async (req, res) => {
     const { name, manager_id } = req.body;
 
     if (!name) {
@@ -43,7 +43,7 @@ export const createDepartment = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет обновлённый отдел или сообщение об ошибке через HTTP-ответ.
  */
-export const updateDepartment = async (req, res) => {
+const updateDepartment = async (req, res) => {
     const { id } = req.params;
     const { name, manager_id } = req.body;
 
@@ -71,7 +71,7 @@ export const updateDepartment = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет список всех отделов или сообщение об ошибке через HTTP-ответ.
  */
-export const getDepartments = async (req, res) => {
+const getDepartments = async (req, res) => {
     try {
         const departments = await Department.getAll();
         res.status(200).json(departments);
@@ -93,7 +93,7 @@ export const getDepartments = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет объект отдела или сообщение об ошибке через HTTP-ответ.
  */
-export const getDepartmentById = async (req, res) => {
+const getDepartmentById = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
@@ -122,7 +122,7 @@ export const getDepartmentById = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет объект отдела или сообщение об ошибке через HTTP-ответ.
  */
-export const getDepartmentByManagerId = async (req, res) => {
+const getDepartmentByManagerId = async (req, res) => {
     const managerId = req.user.id;
 
     try {
@@ -149,7 +149,7 @@ export const getDepartmentByManagerId = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет HTTP-ответ с кодом 204 при успехе или ошибку.
  */
-export const deleteDepartment = async (req, res) => {
+const deleteDepartment = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
@@ -165,4 +165,13 @@ export const deleteDepartment = async (req, res) => {
     } catch (err) {
         res.status(err.status || 500).json({ message: err.message });
     }
+};
+
+module.exports = {
+    createDepartment,
+    updateDepartment,
+    getDepartments,
+    getDepartmentById,
+    getDepartmentByManagerId,
+    deleteDepartment
 };

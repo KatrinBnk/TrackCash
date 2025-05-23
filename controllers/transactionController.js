@@ -1,4 +1,4 @@
-import Transaction from '../models/transaction.js';
+const Transaction = require('../models/transaction.js');
 
 /**
  * Добавляет новую транзакцию для сотрудника.
@@ -18,7 +18,7 @@ import Transaction from '../models/transaction.js';
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет созданную транзакцию или сообщение об ошибке через HTTP-ответ.
  */
-export const addTransaction = async (req, res) => {
+const addTransaction = async (req, res) => {
     const creatorId = req.user.id;
     const { userId, categoryId, type, amount, date, comment } = req.body;
 
@@ -57,7 +57,7 @@ export const addTransaction = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет обновлённую транзакцию или сообщение об ошибке через HTTP-ответ.
  */
-export const updateTransaction = async (req, res) => {
+const updateTransaction = async (req, res) => {
     const creatorId = req.user.id;
     const { id } = req.params;
     const { categoryId, type, amount, date, comment } = req.body;
@@ -90,7 +90,7 @@ export const updateTransaction = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет HTTP-ответ с кодом 204 при успехе или ошибку.
  */
-export const deleteTransaction = async (req, res) => {
+const deleteTransaction = async (req, res) => {
     const creatorId = req.user.id;
     const { id } = req.params;
 
@@ -103,4 +103,10 @@ export const deleteTransaction = async (req, res) => {
     } catch (err) {
         res.status(err.status || 500).json({ message: err.message });
     }
+};
+
+module.exports = {
+    addTransaction,
+    updateTransaction,
+    deleteTransaction
 };

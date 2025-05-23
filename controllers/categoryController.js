@@ -1,4 +1,4 @@
-import Category from '../models/category.js';
+const Category = require('../models/category.js');
 
 /**
  * Создаёт новую категорию в отделе менеджера.
@@ -13,7 +13,7 @@ import Category from '../models/category.js';
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет созданную категорию или сообщение об ошибке через HTTP-ответ.
  */
-export const createCategory = async (req, res) => {
+const createCategory = async (req, res) => {
     const managerId = req.user.id;
     const { name } = req.body;
 
@@ -42,7 +42,7 @@ export const createCategory = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет список категорий или сообщение об ошибке через HTTP-ответ.
  */
-export const getCategories = async (req, res) => {
+const getCategories = async (req, res) => {
     const userId = req.user.id;
     const categoryName = req.query.name;
 
@@ -69,7 +69,7 @@ export const getCategories = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет обновлённую категорию или сообщение об ошибке через HTTP-ответ.
  */
-export const updateCategory = async (req, res) => {
+const updateCategory = async (req, res) => {
     const { id } = req.params;
     const { name } = req.body;
     const managerId = req.user.id;
@@ -99,7 +99,7 @@ export const updateCategory = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет HTTP-ответ с кодом 204 при успехе или ошибку.
  */
-export const deleteCategory = async (req, res) => {
+const deleteCategory = async (req, res) => {
     const managerId = req.user.id;
     const { id } = req.params;
 
@@ -113,4 +113,11 @@ export const deleteCategory = async (req, res) => {
     } catch (err) {
         res.status(err.status || 500).json({ message: err.message });
     }
+};
+
+module.exports = {
+    createCategory,
+    getCategories,
+    updateCategory,
+    deleteCategory
 };

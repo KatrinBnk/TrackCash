@@ -1,4 +1,4 @@
-import db from '../config/db.js';
+const db = require('../config/db.js');
 
 class Department {
 
@@ -187,4 +187,4 @@ class Department {
     }
 }
 
-export default Department;
+module.exports = Department;

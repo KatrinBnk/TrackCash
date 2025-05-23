@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
-export const authenticateToken = (req, res, next) => {
+const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
@@ -16,28 +16,28 @@ export const authenticateToken = (req, res, next) => {
     }
 };
 
-export const requireAdmin = (req, res, next) => {
+const requireAdmin = (req, res, next) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Admin access required' });
     }
     next();
 };
 
-export const requireEmployee = (req, res, next) => {
+const requireEmployee = (req, res, next) => {
     if (req.user.role !== 'employee') {
         return res.status(403).json({ message: 'Employee access required' });
     }
     next();
 };
 
-export const requireManager = (req, res, next) => {
+const requireManager = (req, res, next) => {
     if (req.user.role !== 'manager') {
         return res.status(403).json({ message: 'Manager access required' });
     }
     next();
 };
 
-export const checkRole = (requiredRole) => {
+const checkRole = (requiredRole) => {
     return (req, res, next) => {
         const token = req.cookies.token;
 
@@ -56,4 +56,12 @@ export const checkRole = (requiredRole) => {
             return res.clearCookie('token').redirect('/login');
         }
     };
+};
+
+module.exports = {
+    authenticateToken,
+    requireAdmin,
+    requireEmployee,
+    requireManager,
+    checkRole
 };

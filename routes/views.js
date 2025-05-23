@@ -1,5 +1,5 @@
-import express from 'express';
-import { checkRole, authenticateToken, requireAdmin, requireManager, requireEmployee } from '../middleware/auth.js';
+const express = require('express');
+const { checkRole, authenticateToken, requireAdmin, requireManager, requireEmployee } = require('../middleware/auth.js');
 
 const router = express.Router();
 
@@ -61,4 +61,4 @@ router.use((req, res, next) => {
     res.status(404).render('404');
 });
 
-export default router;
+module.exports = router;

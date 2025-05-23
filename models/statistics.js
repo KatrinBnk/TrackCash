@@ -1,5 +1,5 @@
-import db from '../config/db.js';
-import { parse } from 'json2csv';
+const db = require('../config/db.js');
+const { parse } = require('json2csv');
 
 class Statistics {
     /**
@@ -337,4 +337,4 @@ class Statistics {
     }
 }
 
-export default Statistics;
+module.exports = Statistics;

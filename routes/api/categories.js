@@ -1,6 +1,6 @@
-import express from 'express';
-import * as categoryController from '../../controllers/categoryController.js';
-import { authenticateToken, requireManager } from '../../middleware/auth.js';
+const express = require('express');
+const categoryController = require('../../controllers/categoryController.js');
+const { authenticateToken, requireManager } = require('../../middleware/auth.js');
 
 const router = express.Router();
 
@@ -9,4 +9,4 @@ router.get('/', authenticateToken, categoryController.getCategories);
 router.put('/:id', authenticateToken, requireManager, categoryController.updateCategory);
 router.delete('/:id', authenticateToken, requireManager, categoryController.deleteCategory);
 
-export default router;
+module.exports = router;

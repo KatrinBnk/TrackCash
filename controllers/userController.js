@@ -1,4 +1,4 @@
-import User from '../models/user.js';
+const User = require('../models/user.js');
 
 /**
  * Получает список всех пользователей.
@@ -9,7 +9,7 @@ import User from '../models/user.js';
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет список всех пользователей или сообщение об ошибке через HTTP-ответ.
  */
-export const getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll();
         res.status(200).json(users);
@@ -29,7 +29,7 @@ export const getAllUsers = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет объект пользователя или сообщение об ошибке через HTTP-ответ.
  */
-export const getUserById = async (req, res) => {
+const getUserById = async (req, res) => {
     const { id } = req.params;
     try {
         const user = await User.findById(id);
@@ -53,7 +53,7 @@ export const getUserById = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет объект пользователя или сообщение об ошибке через HTTP-ответ.
  */
-export const getMe = async (req, res) => {
+const getMe = async (req, res) => {
     const { id } = req.user;
     try {
         const user = await User.findById(id);
@@ -77,11 +77,10 @@ export const getMe = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет список пользователей или сообщение об ошибке через HTTP-ответ.
  */
-export const getUsersByDepartmentId = async (req, res) => {
+const getUsersByDepartmentId = async (req, res) => {
     const { id } = req.params;
     try {
         const users = await User.getUserByDepartmentId(id);
-        console.log(users);
         res.status(200).json(users);
     } catch (err) {
         res.status(err.status || 500).json({ message:  err.message });
@@ -105,7 +104,7 @@ export const getUsersByDepartmentId = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет обновленного пользователя или сообщение об ошибке через HTTP-ответ.
  */
-export const updateUser = async (req, res) => {
+const updateUser = async (req, res) => {
     const { id } = req.params;
     const { surname, name, patronymic, role, department_id } = req.body;
 
@@ -134,7 +133,7 @@ export const updateUser = async (req, res) => {
  * @param {Object} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет сообщение об успешном удалении или ошибке через HTTP-ответ.
  */
-export const deleteUser = async (req, res) => {
+const deleteUser = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -146,4 +145,13 @@ export const deleteUser = async (req, res) => {
     } catch (err) {
         res.status(err.status || 500).json({ message: err.message });
     }
+};
+
+module.exports = {
+    getAllUsers,
+    getUserById,
+    getMe,
+    getUsersByDepartmentId,
+    updateUser,
+    deleteUser
 };

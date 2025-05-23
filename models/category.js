@@ -1,4 +1,4 @@
-import db from '../config/db.js';
+const db = require('../config/db.js');
 
 class Category {
     /**
@@ -141,4 +141,4 @@ class Category {
     }
 }
 
-export default Category;
+module.exports = Category;

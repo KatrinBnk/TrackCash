@@ -1,6 +1,6 @@
-import express from 'express';
-import * as transactionController from '../../controllers/transactionController.js';
-import { authenticateToken, requireEmployee, requireManager } from '../../middleware/auth.js';
+const express = require('express');
+const transactionController = require('../../controllers/transactionController.js');
+const { authenticateToken, requireEmployee, requireManager } = require('../../middleware/auth.js');
 
 const router = express.Router();
 
@@ -30,4 +30,4 @@ router.post('/', authenticateToken, requireRoleForCreate, transactionController.
 router.put('/:id', authenticateToken, requireRoleForUpdate, transactionController.updateTransaction);
 router.delete('/:id', authenticateToken, requireEmployee, transactionController.deleteTransaction);
 
-export default router;
+module.exports = router;

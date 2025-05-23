@@ -1,4 +1,4 @@
-import Statistics from '../models/statistics.js';
+const Statistics = require('../models/statistics.js');
 
 /**
  * Получает общую статистику транзакций (суммы) для пользователя.
@@ -19,7 +19,7 @@ import Statistics from '../models/statistics.js';
  * @param {import('express').Response} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет статистику в формате JSON или CSV через HTTP-ответ.
  */
-export const getSummaryStatistics = async (req, res) => {
+const getSummaryStatistics = async (req, res) => {
     const creatorId = req.user.id;
     const {
         departmentId,
@@ -77,7 +77,7 @@ export const getSummaryStatistics = async (req, res) => {
  * @param {import('express').Response} res - Объект ответа Express.
  * @returns {Promise<void>} - Отправляет статистику в формате JSON или CSV через HTTP-ответ.
  */
-export const getDetailedStatistics = async (req, res) => {
+const getDetailedStatistics = async (req, res) => {
     const creatorId = req.user.id;
     const {
         departmentId,
@@ -102,8 +102,6 @@ export const getDetailedStatistics = async (req, res) => {
 
         const stats = await Statistics.getDetailedStatistics(params);
 
-        console.log(stats)
-
         if (format === 'csv') {
             const csv = Statistics.exportDetailedToCSV(stats);
             res.header('Content-Type', 'text/csv');
@@ -116,4 +114,9 @@ export const getDetailedStatistics = async (req, res) => {
         console.error('Ошибка при получении детализированной статистики:', err);
         res.status(err.status || 500).json({ message: err.message });
     }
+};
+
+module.exports = {
+    getSummaryStatistics,
+    getDetailedStatistics
 };

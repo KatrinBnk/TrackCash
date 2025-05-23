@@ -1,6 +1,6 @@
-import express from 'express';
-import * as departmentController from '../../controllers/departmentController.js';
-import { authenticateToken, requireAdmin } from '../../middleware/auth.js';
+const express = require('express');
+const departmentController = require('../../controllers/departmentController.js');
+const { authenticateToken, requireAdmin } = require('../../middleware/auth.js');
 
 const router = express.Router();
 
@@ -10,4 +10,4 @@ router.get('/', authenticateToken, departmentController.getDepartments);
 router.get('/:id', authenticateToken, departmentController.getDepartmentById);
 router.delete('/:id', authenticateToken, requireAdmin, departmentController.deleteDepartment);
 
-export default router;
+module.exports = router;
