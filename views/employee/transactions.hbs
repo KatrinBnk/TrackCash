@@ -276,6 +276,13 @@
                     categories.forEach(category => {
                         categoryMenu.append(`<div class="dropdown-item" data-value="${category.id}">${category.name}</div>`);
                     });
+                    
+                    $('#transaction-category-menu .dropdown-item').off('click').on('click', function() {
+                        selectedCategory = $(this).data('value');
+                        $('#transaction-category-toggle').text($(this).text());
+                        $('#transaction-category-menu').removeClass('show');
+                    });
+                    
                     transactionTable = initializeTransactionTable({
                         creatorId,
                         getCategories: () => categories,
