@@ -159,6 +159,7 @@ function initializeTransactionTable(options) {
             <select class="editable-select type-select">
                 <option value="income" ${currentType === 'income' ? 'selected' : ''}>Доход</option>
                 <option value="expense" ${currentType === 'expense' ? 'selected' : ''}>Расход</option>
+                <option value="balance" ${currentType === 'balance' ? 'selected' : ''}>Баланс</option>
             </select>
         `);
 

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление зарплатами - CashTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
             margin: 0;
@@ -174,6 +175,67 @@
             font-weight: 400;
         }
 
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-buttons button {
+            padding: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: transparent;
+        }
+
+        .edit-btn {
+            color: #7255A5;
+        }
+
+        .delete-btn {
+            color: #F28C38;
+        }
+
+        .save-btn {
+            color: #BBFBAC;
+        }
+
+        .cancel-btn {
+            color: #F28C38;
+        }
+
+        .action-buttons button:hover {
+            opacity: 0.8;
+        }
+
+        .editing .edit-btn,
+        .editing .delete-btn {
+            display: none;
+        }
+
+        .editing .save-btn,
+        .editing .cancel-btn {
+            display: inline-block;
+        }
+
+        .save-btn,
+        .cancel-btn {
+            display: none;
+        }
+
+        .editable-date,
+        .editable-select {
+            padding: 5px;
+            border: 1px solid #7255A5;
+            border-radius: 4px;
+            background-color: #F7F2E8;
+            color: #1F2526;
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
         .no-transactions {
             margin-top: 20px;
             padding: 15px;
@@ -277,7 +339,6 @@
                     const transactions = transactionsData.transactions;
 
                     if (transactions && Array.isArray(transactions) && transactions.length > 0) {
-
                         const table = `
                             <table class="history-table">
                                 <thead>
@@ -285,14 +346,23 @@
                                         <th>Дата</th>
                                         <th>Сумма</th>
                                         <th>Комментарий</th>
+                                        <th>Действия</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     ${transactions.map(tx => `
-                                        <tr>
-                                            <td>${new Date(tx.date).toLocaleDateString()}</td>
+                                        <tr data-id="${tx.id}">
+                                            <td data-date="${tx.date}">${new Date(tx.date).toLocaleDateString()}</td>
                                             <td>${tx.amount}</td>
                                             <td>${tx.comment || '-'}</td>
+                                            <td class="actions">
+                                                <div class="action-buttons">
+                                                    <button class="edit-btn"><i class="fas fa-edit"></i></button>
+                                                    <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                                                    <button class="save-btn"><i class="fas fa-save"></i></button>
+                                                    <button class="cancel-btn"><i class="fas fa-times"></i></button>
+                                                </div>
+                                            </td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -390,6 +460,88 @@
                     alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
                 }
             });
+        });
+
+        // Обработчики для редактирования и удаления транзакций
+        $(document).on('click', '.edit-btn', function () {
+            const row = $(this).closest('tr');
+            const actions = row.find('.actions');
+            const id = row.data('id');
+
+            const originalData = {
+                date: row.find('td:eq(0)').data('date'),
+                dateDisplay: row.find('td:eq(0)').text(),
+                amount: row.find('td:eq(1)').text(),
+                comment: row.find('td:eq(2)').text()
+            };
+
+            const dateCell = row.find('td:eq(0)');
+            dateCell.html(`<input type="date" class="editable-date" value="${originalData.date}">`);
+
+            row.find('td:eq(1)').attr('contenteditable', true);
+            row.find('td:eq(2)').attr('contenteditable', true);
+
+            actions.addClass('editing');
+
+            actions.find('.save-btn').off('click').on('click', function () {
+                const updatedData = {
+                    date: row.find('.editable-date').val(),
+                    amount: parseFloat(row.find('td:eq(1)').text().trim()),
+                    comment: row.find('td:eq(2)').text().trim() === '-' ? null : row.find('td:eq(2)').text().trim(),
+                    type: 'balance'
+                };
+
+                if (!updatedData.date || isNaN(updatedData.amount) || updatedData.amount <= 0) {
+                    alert('Укажите корректные дату и сумму!');
+                    return;
+                }
+
+                $.ajax({
+                    url: `/api/transactions/${id}`,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(updatedData),
+                    success: function (response) {
+                        alert(response.message);
+                        actions.removeClass('editing');
+                        row.find('td').attr('contenteditable', false);
+                        loadHistory(userId, detailsContainer);
+                    },
+                    error: function (xhr) {
+                        alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                    }
+                });
+            });
+
+            actions.find('.cancel-btn').off('click').on('click', function () {
+                actions.removeClass('editing');
+                row.find('td:eq(0)').html(originalData.dateDisplay);
+                row.find('td:eq(0)').data('date', originalData.date);
+                row.find('td:eq(1)').text(originalData.amount);
+                row.find('td:eq(2)').text(originalData.comment);
+                row.find('td').attr('contenteditable', false);
+            });
+        });
+
+        $(document).on('click', '.delete-btn', function () {
+            const row = $(this).closest('tr');
+            const transactionId = row.data('id');
+            const userId = row.closest('.payout-details').attr('id').replace('payout-', '');
+            const detailsContainer = row.closest('.payout-details');
+
+            if (confirm('Вы уверены, что хотите удалить эту транзакцию?')) {
+                $.ajax({
+                    url: `/api/transactions/${transactionId}`,
+                    method: 'DELETE',
+                    success: function () {
+                        alert('Транзакция успешно удалена');
+                        loadHistory(userId, detailsContainer);
+                    },
+                    error: function (xhr) {
+                        alert('Ошибка: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                    }
+                });
+            }
         });
     });
 </script>

@@ -17,7 +17,7 @@ const requireRoleForCreate = (req, res, next) => {
 
 const requireRoleForUpdate = (req, res, next) => {
     const { type } = req.body;
-    if (type === 'balance') {
+    if (type === 'balance' || type === 'income' ) {
         return requireManager(req, res, next);
     } else if (type === 'income' || type === 'expense') {
         return requireEmployee(req, res, next);
