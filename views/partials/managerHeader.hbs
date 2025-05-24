@@ -12,23 +12,6 @@
     </nav>
 </header>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="/js/auth.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#logout-btn').on('click', function(e) {
-            e.preventDefault();
-            $.ajax({
-                url: '/api/auth/logout',
-                method: 'POST',
-                success: function() {
-                    removeToken();
-                    window.location.href = '/login';
-                }
-            });
-        });
-    });
-</script>
 
 <style>
     .manager-header {
@@ -88,3 +71,21 @@
         color: #7255A5;
     }
 </style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#logout-btn').on('click', function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/api/auth/logout',
+                method: 'POST',
+                success: function() {
+                    removeToken();
+                    window.location.href = '/login';
+                }
+            });
+        });
+    });
+</script>
